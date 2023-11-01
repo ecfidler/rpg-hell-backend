@@ -1,12 +1,13 @@
+
 CREATE TABLE `requirements` (
-  `req_id` integer PRIMARY KEY,
+  `req_id` integer PRIMARY KEY AUTO_INCREMENT, 
   `object_id` integer COMMENT 'Foreign Key',
   `type` integer COMMENT '0-8: Body,Mind,Soul,Arcana,Charm,Crafting,Medicine,Nature,Thieving',
   `value` integer
 );
 
 CREATE TABLE `objects` (
-  `id` integer PRIMARY KEY,
+  `id` integer PRIMARY KEY AUTO_INCREMENT,
   `name` text,
   `effect` text
 );
@@ -18,7 +19,7 @@ CREATE TABLE `traits` (
 );
 
 CREATE TABLE `spells` (
-  `id` integer PRIMARY KEY,
+  `id` integer PRIMARY KEY AUTO_INCREMENT,
   `name` text,
   `effect` text,
   `dice` integer COMMENT 'Number of dice for cast (1-3)',
@@ -26,6 +27,7 @@ CREATE TABLE `spells` (
 );
 
 CREATE TABLE `spell_tags` (
+  `tag_id` INTEGER PRIMARY KEY AUTO_INCREMENT,
   `spell_id` integer COMMENT 'Foreign Key',
   `name` text COMMENT '1-8: AOE,Attack,CC,Damage,Focus,Ranged,Touch,Utility'
 );
@@ -37,6 +39,7 @@ CREATE TABLE `items` (
 );
 
 CREATE TABLE `item_tags` (
+  `tag_id` INTEGER PRIMARY KEY AUTO_INCREMENT,
   `item_id` integer COMMENT 'Foreign Key',
   `name` text,
   `value` integer
