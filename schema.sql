@@ -1,7 +1,7 @@
 CREATE TABLE `requirements` (
   `req_id` integer PRIMARY KEY,
   `object_id` integer COMMENT 'Foreign Key',
-  `type` integer,
+  `type` integer COMMENT '0-8: Body,Mind,Soul,Arcana,Charm,Crafting,Medicine,Nature,Thieving',
   `value` integer
 );
 
@@ -13,31 +13,32 @@ CREATE TABLE `objects` (
 
 CREATE TABLE `traits` (
   `id` integer PRIMARY KEY COMMENT 'Foreign Key',
-  `dice` integer
+  `dice` integer COMMENT 'Dice cost (0-4)',
+  `is_passive` bool COMMENT 'Is a Passive, used as a suport for assisting in difrences between Pure passives and action passives'
 );
 
 CREATE TABLE `spells` (
   `id` integer PRIMARY KEY,
   `name` text,
   `effect` text,
-  `dice` integer,
-  `level` integer
+  `dice` integer COMMENT 'Number of dice for cast (1-3)',
+  `level` integer COMMENT 'Strain Cost (0-10)'
 );
 
 CREATE TABLE `spell_tags` (
-  `spell_id` integer,
-  `name` integer
+  `spell_id` integer COMMENT 'Foreign Key',
+  `name` text COMMENT '1-8: AOE,Attack,CC,Damage,Focus,Ranged,Touch,Utility'
 );
 
 CREATE TABLE `items` (
   `id` integer PRIMARY KEY COMMENT 'Foreign Key',
-  `cost` integer,
-  `craft` integer
+  `cost` integer COMMENT 'Gold Cost to buy',
+  `craft` integer COMMENT 'Crafting Cost'
 );
 
 CREATE TABLE `item_tags` (
-  `item_id` integer,
-  `name` integer,
+  `item_id` integer COMMENT 'Foreign Key',
+  `name` text,
   `value` integer
 );
 
