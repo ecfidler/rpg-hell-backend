@@ -22,8 +22,8 @@ class Object():
     req = []
 
     def __init__(self, _name: str, _effect: str, _req = []):
-        self.name = _name
-        self.effect = _effect
+        self.name = str(_name).lower()
+        self.effect = str(_effect).lower()
         self.req = _req
         
 
@@ -32,10 +32,10 @@ class Trait(Object):
     is_passive: bool = False
     
     def __init__(self, _name: str, _effect: str, _req, _dice: int, _is_passive = False):
-        self.name = _name
-        self.effect = _effect
-        self.dice = _dice
-        self.is_passive = _is_passive
+        self.name = str(_name).lower()
+        self.effect = str(_effect).lower()
+        self.dice = int(_dice)
+        self.is_passive = bool(_is_passive)
         if self.dice == 0:
             self.is_passive = True
         
@@ -48,10 +48,10 @@ class Item(Object):
     tags = []
     
     def __init__(self, _name: str, _effect: str, _cost: int, _craft: int, _tags, _req=[]):
-        self.name = _name
-        self.effect = _effect
-        self.cost = _cost
-        self.craft = _craft
+        self.name = str(_name).lower()
+        self.effect = str(_effect).lower()
+        self.cost = int(_cost)
+        self.craft = int(_craft)
         self.tags = _tags
 
         self.req = _req
@@ -66,10 +66,10 @@ class Spell():
     tags = []
     
     def __init__(self, _name: str, _effect: str, _dice: int, _level: int, _tags):
-        self.name = _name
-        self.effect = _effect
-        self.dice = _dice
-        self.level = _level
+        self.name = str(_name).lower()
+        self.effect = str(_effect).lower()
+        self.dice = int(_dice)
+        self.level = int(_level)
         self.tags = _tags
 
 
@@ -102,7 +102,7 @@ def add_requirements(obj,cursor):
             else:
                 typ = rq
                 val = 0
-            query += f'({obj.id}, "{typ}", {val}),'
+            query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
         query = query[:-1]+";" # required to do magic for later
         cursor.execute(query)
         # print(query)
@@ -130,7 +130,7 @@ def create_item(obj: Item, cursor): #item: Item
             else:
                 typ = tag
                 val = 0
-            query += f'({obj.id}, "{typ}", {val}),'
+            query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
         query = query[:-1]+";" # required to do magic for later
         cursor.execute(query, (obj.id, obj.cost, obj.craft))
         # print(query)
@@ -148,7 +148,7 @@ def add_spell_tags(obj: Spell, cursor): #item: Item
     if obj.tags != None:
         query = "INSERT INTO spell_tags (spell_id, name) VALUES "
         for tag in obj.tags:
-            query += f'({obj.id}, "{tag}"),'
+            query += f'({obj.id}, "{str(tag).lower()}"),'
         query = query[:-1]+";" # required to do magic for later
         cursor.execute(query)
         # print(query)
@@ -166,30 +166,6 @@ def create_spell(obj, cursor): #item: Item
 
 
 
-# Route to read an item
-# @app.get("/items/{item_id}", response_model=Item)
-def read_object(object_id):
-    cursor = conn.cursor()
-    try:
-        err = "ID"
-        query = f"SELECT id, name, effect FROM objects WHERE id={int(object_id)}"
-    except:
-        err = "NAME"
-        query = f'SELECT id, name, effect FROM objects WHERE name="{object_id}"'
-
-    cursor.execute(query)
-    item = cursor.fetchone()
-
-    query = f"SELECT type, value FROM requirements WHERE object_id={item[0]}"
-    cursor.execute(query)
-    req = cleanup_tags(cursor.fetchall())
-
-    cursor.close()
-    if item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return {"id": item[0], "name": item[1], "effect": item[2],"req":req}
-
-
 def cleanup_tags(tags):
     t = []
     for tag in tags:
@@ -199,6 +175,57 @@ def cleanup_tags(tags):
             t.append(str(tag[0]))
     return t
 
+
+# Route to read an item
+# @app.get("/items/{item_id}", response_model=Item)
+def read_object(object_id):
+    cursor = conn.cursor()
+    try:
+        err = "ID"
+        query = f"SELECT id, name, effect FROM objects WHERE id={int(object_id)}"
+    except:
+        err = "NAME"
+        query = f'SELECT id, name, effect FROM objects WHERE name="{str(object_id).lower()}"'
+
+    cursor.execute(query)
+    item = cursor.fetchone()
+
+    query = f"SELECT type, value FROM requirements WHERE object_id={item[0]}"
+    cursor.execute(query)
+    req = cleanup_tags(cursor.fetchall())
+
+    
+    if item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+
+    info = {"id": item[0], "name": item[1], "effect": item[2],"req":req}
+    
+    # traits
+    cursor.execute(f"SELECT dice, is_passive FROM traits WHERE id={info['id']}")
+    item = cursor.fetchone()
+    if item != None:
+        info["dice"] = item[0]
+        info["is_passive"] = item[1]
+
+    # items
+    cursor.execute(f"SELECT cost, craft FROM items WHERE id={info['id']}")
+    item = cursor.fetchone()
+    if item != None:
+        info["cost"] = item[0]
+        info["craft"] = item[1]
+
+        cursor.execute(f"SELECT name, value FROM item_tags WHERE item_id={info['id']}")
+        tags = cleanup_tags(cursor.fetchall())
+        info["tags"] = tags
+
+
+
+    cursor.close()
+    return info
+
+
+
 def read_spell(spell_quiry):
     cursor = conn.cursor()
     try:
@@ -206,17 +233,18 @@ def read_spell(spell_quiry):
         query = f"SELECT id, name, effect, dice, level FROM spells WHERE id={int(spell_quiry)}"
     except:
         err = "NAME"
-        query = f'SELECT id, name, effect, dice, level FROM spells WHERE name="{spell_quiry}"'
+        query = f'SELECT id, name, effect, dice, level FROM spells WHERE name="{str(spell_quiry).lower()}"'
     
     cursor.execute(query)
     item = cursor.fetchone()
-    
-    if item is None:
-        raise HTTPException(status_code=404, detail=f"Item not found with {err} lookup")
-    
+
     query = f"SELECT name FROM spell_tags WHERE spell_id={item[0]}"
     cursor.execute(query)
     tags = cleanup_tags(cursor.fetchall())
+    
+    if item is None:
+        raise HTTPException(status_code=404, detail=f"Item not found with {err} lookup")
+
     cursor.close()
     return {"id": item[0], "name": item[1], "effect": item[2], "dice": item[3], "level": item[4], "tags":tags}
 
@@ -229,7 +257,7 @@ obj = Spell("poprocks","Boom Bam Bop", 2, 0,["ranged","attack"])
 
 # print(create_object(obj).id)
 
-print(read_object("Fishman"))
+print(read_object(25))
 
 print(read_spell(4))
 
