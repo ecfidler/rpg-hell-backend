@@ -2,7 +2,7 @@
 CREATE TABLE `requirements` (
   `req_id` integer PRIMARY KEY AUTO_INCREMENT, 
   `object_id` integer COMMENT 'Foreign Key',
-  `type` integer COMMENT '0-8: Body,Mind,Soul,Arcana,Charm,Crafting,Medicine,Nature,Thieving',
+  `type` text COMMENT 'Body,Mind,Soul,Arcana,Charm,Crafting,Medicine,Nature,Thieving',
   `value` integer
 );
 
