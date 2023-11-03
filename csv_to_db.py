@@ -40,7 +40,7 @@ def create_from_csv(csv_path):
             typ = 2
         elif "Fists" in reader[1]: # check for weapons
             typ = 3
-        elif "Cost" in reader[0]: # check for items
+        elif "Craft" in reader[0]: # check for items
             typ = 4
 
 
@@ -51,7 +51,8 @@ def create_from_csv(csv_path):
                 # Name,Cost,Effect,Tags
                 print(f"Making Spell {row[0]}")
                 dice, level = get_cost(row[1])
-                obj = Spell(row[0],row[2],dice,level,row[3])
+                tags = spliter(row[3])
+                obj = Spell(row[0],row[2],dice,level,tags)
             elif typ == 1:
                 # Name,Requirements,Dice Cost,Effect
                 print(f"Making Trait {row[0]}")
@@ -78,7 +79,7 @@ def create_from_csv(csv_path):
                 # Name,Tags,Effect,Cost,Crafting
                 print(f"Making Item {row[0]}")
                 tags = spliter(row[1])
-                obj = Item(row[0],row[2],row[3],row[4],tags)
+                obj = Item(row[0],row[2],0,0,tags)
             
             # print(obj.return_data())
             
@@ -98,4 +99,4 @@ if __name__ == "__main__":
     # MAGIC ERROR
     # clean_csv("Rpg-Hell-db/Items_all.csv")
     # create_from_csv("Rpg-Hell-db/Items_all.csv")
-    # create_from_csv("Rpg-Hell-db/Spells_all.csv")
+    create_from_csv("Rpg-Hell-db/Spells_all.csv")

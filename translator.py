@@ -83,7 +83,7 @@ class Item(Object):
     
 
 class Spell():
-    id: int
+    id: int = 0
     name : str
     effect : str = None
     dice: int = 0
@@ -135,7 +135,7 @@ def create(obj):
     
 
 def add_requirements(obj,cursor):
-    if obj.req != None:
+    if obj.req != None and obj.req != []:
         query = "INSERT INTO requirements (object_id, type, value) VALUES "
         for rq in obj.req:
             if " " in rq:
