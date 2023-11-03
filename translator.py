@@ -16,15 +16,28 @@ app = FastAPI()
 
 
 class Object():
-    id: int
+    id: int = 0
     name : str
     effect : str = None
     req = []
 
     def __init__(self, _name: str, _effect: str, _req = []):
         self.name = str(_name).lower()
-        self.effect = str(_effect).lower()
+        self.effect = str(_effect)
         self.req = _req
+
+    def return_data(self):
+        info = self.easy_data()
+        self.update_info(info)
+        return info
+    
+    def update_info(info):
+        # this is a way to easily update other stuff
+        pass
+    
+
+    def easy_data(self):
+        return({"id": self.id, "name": self.name, "effect": self.effect,"req":self.req})
         
 
 class Trait(Object):
@@ -33,13 +46,20 @@ class Trait(Object):
     
     def __init__(self, _name: str, _effect: str, _req, _dice: int, _is_passive = False):
         self.name = str(_name).lower()
-        self.effect = str(_effect).lower()
+        self.effect = str(_effect)
         self.dice = int(_dice)
         self.is_passive = bool(_is_passive)
         if self.dice == 0:
             self.is_passive = True
         
         self.req = _req
+
+    
+    def update_info(self,info):
+        info["dice"] = self.dice
+        info["is_passive"] = self.is_passive
+    
+
 
 
 class Item(Object):
@@ -49,12 +69,17 @@ class Item(Object):
     
     def __init__(self, _name: str, _effect: str, _cost: int, _craft: int, _tags, _req=[]):
         self.name = str(_name).lower()
-        self.effect = str(_effect).lower()
+        self.effect = str(_effect)
         self.cost = int(_cost)
         self.craft = int(_craft)
         self.tags = _tags
 
         self.req = _req
+
+    def update_info(self,info):
+        info["cost"] = self.cost
+        info["craft"] = self.craft
+        info["tags"] = self.tags
     
 
 class Spell():
@@ -67,31 +92,47 @@ class Spell():
     
     def __init__(self, _name: str, _effect: str, _dice: int, _level: int, _tags):
         self.name = str(_name).lower()
-        self.effect = str(_effect).lower()
+        self.effect = str(_effect)
         self.dice = int(_dice)
         self.level = int(_level)
         self.tags = _tags
 
+    def return_data(self):
+        return {"id": self.id, "name": self.name, "effect": self.effect, "dice": self.dice, "level": self.level, "tags":self.tags}
+
+
+
+
 
 def create(obj):
     cursor = conn.cursor()
+    print("Start Creation")
     try:
         clss = obj.__class__
         if clss == Object:
+            print("Creating Obj")
             create_obj(obj, cursor)
         elif clss == Item: # match (switch) cases dont exist in this vs of python. Very sad
+            print("Creating Item")
             create_item(obj, cursor)
         elif clss == Trait:
+            print("Creating Trait")
             create_trait(obj, cursor)
         elif clss == Spell:
+            print("Creating Spell")
             create_spell(obj, cursor)
+        else:
+            Exception("it broke, no give item")
             
         cursor.close()
         conn.commit()
+        print("Creation Successful")
+
     except:
-        print("Error occured")
+        print(f"Error occured in {clss}")
         cursor.close()
         conn.rollback()
+    
 
 def add_requirements(obj,cursor):
     if obj.req != None:
@@ -101,20 +142,27 @@ def add_requirements(obj,cursor):
                 typ, val = rq.split(" ")
             else:
                 typ = rq
-                val = 0
+                val = 1
             query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
         query = query[:-1]+";" # required to do magic for later
-        cursor.execute(query)
-        # print(query)
+        try:
+            cursor.execute(query)
+        except:
+            print(query)
+            Exception("Requirements query broke")
     
     return obj
 
 
 def create_obj(obj, cursor): #item: Item
     query = "INSERT INTO objects (name, effect) VALUES (%s, %s);"
-    cursor.execute(query, (obj.name, obj.effect))
-    obj.id = cursor.lastrowid # needed in order to have an id for the next step
-    add_requirements(obj,cursor)
+    try:
+        cursor.execute(query, (obj.name, obj.effect))
+        obj.id = cursor.lastrowid # needed in order to have an id for the next step
+        add_requirements(obj,cursor)
+    except:
+        print(query)
+        Exception("Creation Obj Broke")
     return obj
 
 
@@ -125,21 +173,41 @@ def create_item(obj: Item, cursor): #item: Item
     if obj.tags != None:
         query = "INSERT INTO items (id, cost, craft) VALUES (%s,%s,%s); INSERT INTO item_tags (item_id, name, value) VALUES "
         for tag in obj.tags:
-            if " " in tag:
-                typ, val = tag.split(" ")
+            # print(tag)
+            if "damage" in tag: # damage is backwards...
+                val, typ = tag.split(" ")
+            elif " " in tag:
+                t = tag.split(" ")
+                # print(t)
+                try:
+                    typ, val = " ".join(t[:-1]), int(t[-1])
+                except:
+                    typ = tag
+                    val = 0
+                # print(typ)
+                
             else:
                 typ = tag
                 val = 0
+
             query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
         query = query[:-1]+";" # required to do magic for later
-        cursor.execute(query, (obj.id, obj.cost, obj.craft))
+        try:
+            cursor.execute(query, (obj.id, obj.cost, obj.craft))
+        except:
+            print(query)
+            Exception("Item query Broke")
         # print(query)
     return obj
 
 def create_trait(obj: Trait, cursor): #item: Item
     create_obj(obj,cursor)
     query = "INSERT INTO traits (id, dice, is_passive) VALUES (%s,%s,%s)"
-    cursor.execute(query, (obj.id, obj.dice, obj.is_passive))
+    try:
+        cursor.execute(query, (obj.id, obj.dice, obj.is_passive))
+    except:
+        print(query)
+        Exception("Trait query Broke")
     return obj
 
 
@@ -150,18 +218,37 @@ def add_spell_tags(obj: Spell, cursor): #item: Item
         for tag in obj.tags:
             query += f'({obj.id}, "{str(tag).lower()}"),'
         query = query[:-1]+";" # required to do magic for later
-        cursor.execute(query)
-        # print(query)
+        try:
+            cursor.execute(query)
+        except:
+            print(query)
+            Exception("Spell Tag query Broke")
+        
     return obj
 
 
 def create_spell(obj, cursor): #item: Item
     query = "INSERT INTO spells (name, effect, dice, level) VALUES (%s, %s, %s, %s);"
-    cursor.execute(query, (obj.name, obj.effect, obj.dice, obj.level))
-    obj.id = cursor.lastrowid # needed in order to have an id for the next step
-    add_spell_tags(obj,cursor)
+    try:
+        cursor.execute(query, (obj.name, obj.effect, obj.dice, obj.level))
+        obj.id = cursor.lastrowid # needed in order to have an id for the next step
+        add_spell_tags(obj,cursor)
+    except:
+        print(query)
+        Exception("Spell query Broke")
     return obj
 
+
+
+
+# def update_item(item_id: int, item: Item):
+#     cursor = conn.cursor()
+#     query = "UPDATE objects SET name=%s, effect=%s WHERE id=%s"
+#     cursor.execute(query, (item.name, item.effect, item_id))
+#     conn.commit()
+#     cursor.close()
+#     item.id = item_id
+#     return item
 
 
 
@@ -250,20 +337,22 @@ def read_spell(spell_quiry):
 
 
 
-obj = Item('oh boy','its party time',6,1,['aaaa 20','ooo 1'])
-obj = Trait("Fishman","you become manfish", ["body 1","mind 1"],0)
-obj = Spell("poprocks","Boom Bam Bop", 2, 0,["ranged","attack"])
-# create(obj)
+if __name__ == "__main__":
 
-# print(create_object(obj).id)
+    obj = Item('oh boy','its party time',6,1,['aaaa 20','ooo 1'])
+    obj = Trait("Fishman","you become manfish", ["body 1","mind 1"], 0)
+    obj = Spell("poprocks","Boom Bam Bop", 2, 0,["ranged","attack"])
+    # create(obj)
 
-print(read_object(25))
+    # print(create_object(obj).id)
 
-print(read_spell(4))
+    # print(read_object(25))
 
-# cursor = conn.cursor()
-# query = "SELECT * FROM objects"
-# cursor.execute(query)
-# item = cursor.fetchall() # get all
-# cursor.close()
-# print(item)
+    # print(read_spell(4))
+
+    cursor = conn.cursor()
+    query = "SELECT * FROM objects"
+    cursor.execute(query)
+    item = cursor.fetchall() # get all
+    cursor.close()
+    print(item)
