@@ -251,8 +251,6 @@ def create_spell(obj, cursor): #item: Item
 #     return item
 
 
-
-
 def cleanup_tags(tags):
     t = []
     for tag in tags:
@@ -277,13 +275,13 @@ def read_object(object_id):
     cursor.execute(query)
     item = cursor.fetchone()
 
+    if item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+
     query = f"SELECT type, value FROM requirements WHERE object_id={item[0]}"
     cursor.execute(query)
     req = cleanup_tags(cursor.fetchall())
-
     
-    if item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
     
 
     info = {"id": item[0], "name": item[1], "effect": item[2],"req":req}
@@ -337,11 +335,95 @@ def read_spell(spell_quiry):
 
 
 
-if __name__ == "__main__":
+def delete_core(id: int, loc: str, cursor):
+    id_types = {"spells": "id",
+        "spell_tags": "spell_id",
+        "traits": "id",
+        "objects": "id",
+        "item_tags": "item_id",
+        "items": "id",
+        "requirements": "object_id"}
+    
+    query = f"DELETE FROM {loc} WHERE {id_types[loc]}={id}"
+    # print(query)
+    cursor.execute(query)
+    
 
-    obj = Item('oh boy','its party time',6,1,['aaaa 20','ooo 1'])
-    obj = Trait("Fishman","you become manfish", ["body 1","mind 1"], 0)
-    obj = Spell("poprocks","Boom Bam Bop", 2, 0,["ranged","attack"])
+def delete_item(item):
+    item_id = read_object(item)["id"]
+    cursor = conn.cursor()
+    print(item_id)
+    try:
+        print("Del item tags")
+        delete_core(item_id,"item_tags",cursor)
+        
+        print("Del item")
+        delete_core(item_id,"items",cursor)
+        print("Del requirements")
+        delete_core(item_id,"requirements",cursor)
+        print("Del object")
+        delete_core(item_id,"objects",cursor)
+
+        print(f"Deleated {item} from database")
+        conn.commit()
+        cursor.close()
+    except:
+        print("Del item error")
+        cursor.close()
+        conn.rollback()
+
+    return {"id": item_id}
+
+def delete_trait(trait):
+    item_id = read_object(trait)["id"]
+    cursor = conn.cursor()
+    try:
+        print("Del traits")
+        delete_core(item_id,"traits",cursor)
+        print("Del requirements")
+        delete_core(item_id,"requirements",cursor)
+        print("Del object")
+        delete_core(item_id,"objects",cursor)
+
+        print(f"Deleated {trait} from database")
+
+        conn.commit()
+        cursor.close()
+    except:
+        print("Del item error")
+        cursor.close()
+        conn.rollback()
+
+    return {"id": item_id}
+
+
+def delete_spell(spell):
+    item_id = read_spell(spell)["id"]
+    cursor = conn.cursor()
+    try:
+        print("Del spell tags")
+        delete_core(item_id,"spell_tags",cursor)
+        print("Del spell")
+        delete_core(item_id,"spells",cursor)
+        
+        print(f"Deleated {spell} from database")
+        conn.commit()
+        cursor.close()
+    except:
+        print("Del spell error")
+        cursor.close()
+        conn.rollback()
+
+    return {"id": item_id}
+
+
+
+
+if __name__ == "__main__":
+    pass
+    # obj = Item('oh boy','its party time',6,1,['aaaa 20','ooo 1'])
+    # obj = Trait("Fishman","you become manfish", ["body 1","mind 1"], 0)
+    # obj = Spell("poprocks","Boom Bam Bop", 2, 0,["ranged","attack"])
     # create(obj)
 
     # print(create_object(obj).id)
@@ -350,9 +432,11 @@ if __name__ == "__main__":
 
     # print(read_spell(4))
 
-    cursor = conn.cursor()
-    query = "SELECT * FROM objects"
-    cursor.execute(query)
-    item = cursor.fetchall() # get all
-    cursor.close()
-    print(item)
+    # cursor = conn.cursor()
+    # query = "SELECT * FROM objects"
+    # cursor.execute(query)
+    # item = cursor.fetchall() # get all
+    # cursor.close()
+    # print(item)
+
+    # print(delete_trait("Fishman"))
