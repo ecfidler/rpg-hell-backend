@@ -1,6 +1,5 @@
 import MySQLdb
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import HTTPException
 
 # Database configuration
 db_config = {
@@ -12,8 +11,10 @@ db_config = {
 
 # Create a connection to the database
 conn = MySQLdb.connect(**db_config)
-app = FastAPI()
 
+#######################################################################
+############################### Classes ###############################
+#######################################################################
 
 class Object():
     id: int = 0
@@ -60,8 +61,6 @@ class Trait(Object):
         info["is_passive"] = self.is_passive
     
 
-
-
 class Item(Object):
     cost: int = 0
     craft: int = 0
@@ -101,7 +100,9 @@ class Spell():
         return {"id": self.id, "name": self.name, "effect": self.effect, "dice": self.dice, "level": self.level, "tags":self.tags}
 
 
-
+#######################################################################
+########################## Creation Commands ##########################
+#######################################################################
 
 
 def create(obj):
@@ -200,6 +201,7 @@ def create_item(obj: Item, cursor): #item: Item
         # print(query)
     return obj
 
+
 def create_trait(obj: Trait, cursor): #item: Item
     create_obj(obj,cursor)
     query = "INSERT INTO traits (id, dice, is_passive) VALUES (%s,%s,%s)"
@@ -238,18 +240,75 @@ def create_spell(obj, cursor): #item: Item
         Exception("Spell query Broke")
     return obj
 
+#######################################################################
+########################### Update Commands ###########################
+#######################################################################
 
 
+def update_item(item, update_item: Item):
+    cursor = conn.cursor()
+    item_id = read_object(item)["id"]
+    try:
+        query = f"UPDATE objects SET name={update_item.name}, effect={update_item.effect} WHERE id={item_id}"
+        cursor.execute(query)
+        query = f"UPDATE items SET cost={update_item.craft}, craft={update_item.cost} WHERE id={item_id}"
+        cursor.execute(query)
+        #TODO: Somehow we need to do tags down here
+        
+        #TODO: Somehow we need to do requirements down here
 
-# def update_item(item_id: int, item: Item):
-#     cursor = conn.cursor()
-#     query = "UPDATE objects SET name=%s, effect=%s WHERE id=%s"
-#     cursor.execute(query, (item.name, item.effect, item_id))
-#     conn.commit()
-#     cursor.close()
-#     item.id = item_id
-#     return item
 
+        conn.commit()
+        cursor.close()
+    except:
+        print("Update item error")
+        cursor.close()
+        conn.rollback()
+
+    return {"id": item_id}
+
+def update_trait(trait, update_trait: Trait):
+    cursor = conn.cursor()
+    item_id = read_object(trait)["id"]
+    try:
+        query = f"UPDATE objects SET name={update_trait.name}, effect={update_trait.effect} WHERE id={item_id}"
+        cursor.execute(query)
+        query = f"UPDATE traits SET dice={update_trait.dice}, is_passive={update_trait.is_passive} WHERE id={item_id}"
+        cursor.execute(query)
+        #TODO: Somehow we need to do requirements down here
+
+    
+        conn.commit()
+        cursor.close()
+    except:
+        print("Update trait error")
+        cursor.close()
+        conn.rollback()
+
+    return {"id": item_id}
+
+def update_spell(spell, update_spell: Spell):
+    cursor = conn.cursor()
+    item_id = read_object(spell)["id"]
+    try:
+        query = f"UPDATE objects SET name={update_spell.name}, effect={update_spell.effect}, dice={update_spell.dice}, level={update_spell.level} WHERE id={item_id}"
+        cursor.execute(query)
+        #TODO: Somehow we need to do spell traits down here
+
+    
+        conn.commit()
+        cursor.close()
+    except:
+        print("Update trait error")
+        cursor.close()
+        conn.rollback()
+
+    return {"id": item_id}
+
+
+#######################################################################
+############################ Read Commands ############################
+#######################################################################
 
 def cleanup_tags(tags):
     t = []
@@ -261,8 +320,6 @@ def cleanup_tags(tags):
     return t
 
 
-# Route to read an item
-# @app.get("/items/{item_id}", response_model=Item)
 def read_object(object_id):
     cursor = conn.cursor()
     try:
@@ -310,7 +367,6 @@ def read_object(object_id):
     return info
 
 
-
 def read_spell(spell_quiry):
     cursor = conn.cursor()
     try:
@@ -333,6 +389,10 @@ def read_spell(spell_quiry):
     cursor.close()
     return {"id": item[0], "name": item[1], "effect": item[2], "dice": item[3], "level": item[4], "tags":tags}
 
+
+#######################################################################
+########################### Delete Commands ###########################
+#######################################################################
 
 
 def delete_core(id: int, loc: str, cursor):
@@ -373,6 +433,7 @@ def delete_item(item):
         conn.rollback()
 
     return {"id": item_id}
+
 
 def delete_trait(trait):
     item_id = read_object(trait)["id"]
