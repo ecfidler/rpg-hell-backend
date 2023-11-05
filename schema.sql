@@ -9,7 +9,8 @@ CREATE TABLE `requirements` (
 CREATE TABLE `objects` (
   `id` integer PRIMARY KEY AUTO_INCREMENT,
   `name` text,
-  `effect` text
+  `effect` text,
+  `times_selected` integer DEFAULT 0
 );
 
 CREATE TABLE `traits` (
@@ -34,15 +35,15 @@ CREATE TABLE `spell_tags` (
 
 CREATE TABLE `items` (
   `id` integer PRIMARY KEY COMMENT 'Foreign Key',
-  `cost` integer COMMENT 'Gold Cost to buy',
-  `craft` integer COMMENT 'Crafting Cost'
+  `cost` integer COMMENT 'Gold Cost to buy' DEFAULT 0,
+  `craft` integer COMMENT 'Crafting Cost' DEFAULT 0
 );
 
 CREATE TABLE `item_tags` (
   `tag_id` INTEGER PRIMARY KEY AUTO_INCREMENT,
   `item_id` integer COMMENT 'Foreign Key',
   `name` text,
-  `value` integer
+  `value` integer DEFAULT 0
 );
 
 ALTER TABLE `requirements` ADD FOREIGN KEY (`object_id`) REFERENCES `objects` (`id`);

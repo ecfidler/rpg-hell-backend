@@ -3,10 +3,10 @@ from fastapi import HTTPException
 
 # Database configuration
 db_config = {
-    'host': 'localhost',
-    'user': 'B',
-    'passwd': 'hell',
-    'db': 'rpghelldata',
+    'host': 'shigure-djs',
+    'user': 'ethan',
+    'passwd': 'fidlerr',
+    'db': 'rpghelltest1',
 }
 
 # Create a connection to the database
@@ -99,6 +99,18 @@ class Spell():
     def return_data(self):
         return {"id": self.id, "name": self.name, "effect": self.effect, "dice": self.dice, "level": self.level, "tags":self.tags}
 
+def do_query(query):
+    # todo: ef - fix the exceptions in here.
+    cursor = conn.cursor()
+    
+    cursor.execute(query)
+    item = cursor.fetchall()
+    
+    if item is None:
+        raise HTTPException(status_code=404, detail=f"Item not found with {err} lookup")
+
+    cursor.close()
+    return item
 
 #######################################################################
 ########################## Creation Commands ##########################
@@ -489,7 +501,9 @@ if __name__ == "__main__":
 
     # print(create_object(obj).id)
 
-    # print(read_object(25))
+    # print(read_object(1))
+
+    print(do_query("SELECT * FROM objects"))
 
     # print(read_spell(4))
 

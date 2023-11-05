@@ -1,0 +1,45 @@
+﻿Name,Requirement,Tags,Effect
+Fists,Core,1 Damage,
+Dagger,Core,"1 Damage, Throw Range 6",
+Shortbow,Core,"1 Damage, Range 12, Two Handed",
+Flintlock Pistol,Core,"1 Damage, Armor Shredding, Loading, Range 12",
+Boomerang,Core,"1 Damage, Returning, Throw Range 8",
+Slingshot,Core,"1 Damage, Range 12",Increases the Throw Range of small items by 2.
+Shovel,Core,"1 Damage, Two Handed",As an Attack Action you can throw dirt into someone's eyes to Blind them for a turn. Range 3.
+Net,Core 2,Throw Range 6,Inflict Grappled
+Crossbow,Core 2,"1 Damage, Armor Piercing, Loading, Range 12, Two Handed",
+Staff,Core 2,"2 Damage, Two Handed",
+Short Spear,Core 2,"1 Damage, Armor Piercing, Throw Range 6",
+Sword,Body,2 Damage,
+Axe,Body,"1 Damage, Armor Shredding, Throw Range 8",
+Greatsword,Body 2,"3 Damage, Two Handed",
+Greathammer,Body 2,"2 Damage, Knockback 2, Two Handed",
+Spear,Body 2,"2 Damage, Armor Piercing, Throw Range 8",
+Ancient Blade,Body 4,4 Damage,
+Ancient Axe,Body 4,"3 Damage, Armor Shredding, Throw Range 8",
+Ancient Spear,Body 6,"4 Damage, Armor Piercing, Throw Range 8",
+Ancient Hammer,Body 6,"5 Damage, Knockback 2, Two Handed",
+Rapier,Mind,"1 Damage, Armor Piercing",Move 2 tiles after attack.
+Flintlock Rifle,Mind,"2 Damage, Loading, Range 14, Two Handed",
+Flintlock Shotgun,Mind 2,"2 Damage, Armor Shredding, Knockback 2, Loading, Range 8, Two Handed",
+Longnose Rifle,Mind 2,"2 Damage, Armor Piercing, Loading, Range 14, Two Handed",
+Longbow,Mind 2,"2 Damage, Range 12, Two Handed",
+Compound Bow,Mind 4,"3 Damage, Range 12, Two Handed",
+Lever Action Rifle,Mind 4,"3 Damage, Armor Piercing, Loading, Range 14, Two Handed",
+Ancient Carbine,Mind 6,"4 Damage, Range 12, Two Handed",
+Ancient Long Rifle,Mind 6,"4 Damage, Armor Piercing, Loading, Range 14, Two Handed",
+Soul Lanturn,Soul,"1 Damage, Glow 2",
+Soul Lantern Staff,Soul 2,"1 Damage, Glow 2, Range 8",
+Ancient Star,Soul 4,"2 Damage, Glow 2, Range 8",
+Impact Lance,"Body 2, Mind","1 Damage, Knockback 8",
+Conquerors Banner,"Body 2, Mind","2 Damage, Two Handed","Friendly creatures that are within 2 tiles of the Banner gain 1 Temporary Health at the start of their Turn. "
+Radiant Hammer,"Body 2, Soul","3 Damage, Knockback 2, Throw Range 6, Two Handed",
+Light Ballista,"Body, Mind 2","3 Damage, Armor Piercing, Knockback 2, Loading, Range 12, Two Handed",
+Seeking Thistles,"Mind 2, Soul","2 Damage, Returning, Throw Range 6",
+Tome of Souls,"Mind, Soul 2","1 Damage, Range 8",Gain an additional 2 Soul Strain
+Katana,"Body, Mind, Soul","2 Damage, Armor Shredding, Two Handed",Does an additional damage to targets hit by Overwatch
+Tonfas,"Body, Mind, Soul","2 Damage, Two Handed",Gain 1 extra Armor
+Steamthrower,Special,"2 Damage, Burn 1, Loading, Range 8, Two Handed",Goes through targets until the end of its range.
+Bronze Bolter,Special,"1 Damage, Range 14",Each attack fires two bolts (all hits hit twice)
+Clockwork Cannon,Special,"2 Damage, Armor Shredding, Knockback 6, Loading, Range 12, Two Handed",
+Spectral Claws,"Soul, Special","Armor Shredding, Two Handed",Does Your Soul in damage.

@@ -1,0 +1,15 @@
+﻿Name,Requirement,Effect,Defence,Traits
+Shield,Body 1,"1Hand, Armor 1",,"Armor 1, Hand 1"
+Shield,Mind 1,"1Hand, Armor 1",,"Armor 1, Hand 1"
+Unarmored,Core,+1 Speed,">=3., >=4","Defence 0, Speed 1"
+Light,Core,,">=3., >=5",Defence 1
+Medium,Body 1,-1 Speed,">=4, >=4.","Defence 2, nSpeed 1"
+Medium,Mind 1,-1 Speed,">=4, >=4.","Defence 2, nSpeed 1"
+Heavy,Body 1,-2 Speed,">=4., >=5","Defence 3, nSpeed 2"
+Tower Shield,Body 4,"1Hand, Armor 1, Ward 1",,"Armor 1, Hand 1, Ward 1"
+Platemail (Heavy),Body 4,"-2 Speed, Armor 2",">=4., >=5","Armor 2, Defence 3, nSpeed 2"
+Ancient Plate (Heavy),Body 6,"-2 Speed, Armor 4",">=4, >=5","Armor 4, Defence 3, nSpeed 2"
+Padded Leather (Medium),Mind 4,"Armor 1, Ward 1",">=4, >=4.","Armor 1, Defence 2, Ward 1, nSpeed 1"
+Composite Chainmail (Medium),Mind 6,"Armor 2, Ward 1",">=4, >=4.","Armor 2, Defence 2, Ward 1, nSpeed 1"
+Soul Weave Cloak (Light),Soul 4,Ward 2,">=3., >=5","Defence 1, Ward 2"
+Soul Weave Robes (Light),Soul 6,"Armor 1, Ward 2",">=3., >=5","Armor 1, Defence 1, Ward 2"

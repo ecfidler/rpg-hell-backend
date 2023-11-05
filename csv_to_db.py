@@ -29,7 +29,7 @@ def get_cost(data):
 
 
 def create_from_csv(csv_path):
-    with open(csv_path, newline='') as f:
+    with open(csv_path, encoding="utf8", newline='') as f:
         reader = list(csv.reader(f))
         
 
@@ -90,13 +90,13 @@ def create_from_csv(csv_path):
 
 if __name__ == "__main__":
     pass
-    # create_from_csv('Rpg-Hell-db/Armor_all.csv')
-    # create_from_csv("Rpg-Hell-db/Weapons_all.csv")
+    # create_from_csv('data/Armor_all1104.csv')
+    # create_from_csv("data/Weapons_all1104.csv")
 
-    # create_from_csv("Rpg-Hell-db/Traits_all.csv")
+    # create_from_csv("data/Traits_all1105.csv")
     
 
     # MAGIC ERROR
-    # clean_csv("Rpg-Hell-db/Items_all.csv")
-    # create_from_csv("Rpg-Hell-db/Items_all.csv")
-    create_from_csv("Rpg-Hell-db/Spells_all.csv")
+    # clean_csv("data/Items_all.csv")
+    # create_from_csv("data/Items_all.csv")
+    create_from_csv("data/Spells_all1105.csv")
