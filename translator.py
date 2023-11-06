@@ -12,17 +12,23 @@ db_config = {
 # Create a connection to the database
 conn = MySQLdb.connect(**db_config)
 
+
+def spliter(data):
+    lst = str(data).lower().split(", ")
+    return (lst)
+
 #######################################################################
 ############################### Classes ###############################
 #######################################################################
 
+
 class Object():
     id: int = 0
-    name : str
-    effect : str = None
+    name: str
+    effect: str = None
     req = []
 
-    def __init__(self, _name: str, _effect: str, _req = []):
+    def __init__(self, _name: str, _effect: str, _req=[]):
         self.name = str(_name).lower()
         self.effect = str(_effect)
         self.req = _req
@@ -31,41 +37,39 @@ class Object():
         info = self.easy_data()
         self.update_info(info)
         return info
-    
-    def update_info(info):
+
+    def update_info(self, info):
         # this is a way to easily update other stuff
         pass
-    
 
     def easy_data(self):
-        return({"id": self.id, "name": self.name, "effect": self.effect,"req":self.req})
-        
+        return ({"id": self.id, "name": self.name, "effect": self.effect, "req": self.req})
+
 
 class Trait(Object):
     dice: int
     is_passive: bool = False
-    
-    def __init__(self, _name: str, _effect: str, _req, _dice: int, _is_passive = False):
+
+    def __init__(self, _name: str, _effect: str, _req, _dice: int, _is_passive=False):
         self.name = str(_name).lower()
         self.effect = str(_effect)
         self.dice = int(_dice)
         self.is_passive = bool(_is_passive)
         if self.dice == 0:
             self.is_passive = True
-        
+
         self.req = _req
 
-    
-    def update_info(self,info):
+    def update_info(self, info):
         info["dice"] = self.dice
         info["is_passive"] = self.is_passive
-    
+
 
 class Item(Object):
     cost: int = 0
     craft: int = 0
     tags = []
-    
+
     def __init__(self, _name: str, _effect: str, _cost: int, _craft: int, _tags, _req=[]):
         self.name = str(_name).lower()
         self.effect = str(_effect)
@@ -75,20 +79,20 @@ class Item(Object):
 
         self.req = _req
 
-    def update_info(self,info):
+    def update_info(self, info):
         info["cost"] = self.cost
         info["craft"] = self.craft
         info["tags"] = self.tags
-    
+
 
 class Spell():
     id: int = 0
-    name : str
-    effect : str = None
+    name: str
+    effect: str = None
     dice: int = 0
     level: int = 0
     tags = []
-    
+
     def __init__(self, _name: str, _effect: str, _dice: int, _level: int, _tags):
         self.name = str(_name).lower()
         self.effect = str(_effect)
@@ -97,17 +101,21 @@ class Spell():
         self.tags = _tags
 
     def return_data(self):
-        return {"id": self.id, "name": self.name, "effect": self.effect, "dice": self.dice, "level": self.level, "tags":self.tags}
+        return {"id": self.id, "name": self.name, "effect": self.effect, "dice": self.dice, "level": self.level, "tags": self.tags}
+
 
 def do_query(query):
     # todo: ef - fix the exceptions in here.
     cursor = conn.cursor()
-    
+
     cursor.execute(query)
     item = cursor.fetchall()
-    
-    if item is None:
-        raise HTTPException(status_code=404, detail=f"Item not found with {err} lookup")
+
+    # # This isn't really needed, it can just return nothing in response to the query
+    # if item is None:
+    #     cursor.close()
+    #     raise ValueError(
+    #         status_code=404, detail=f"Item(s) not found with query: \"{query}\"")
 
     cursor.close()
     return item
@@ -124,30 +132,33 @@ def create(obj):
         clss = obj.__class__
         if clss == Object:
             print("Creating Obj")
-            create_obj(obj, cursor)
-        elif clss == Item: # match (switch) cases dont exist in this vs of python. Very sad
+            obj = create_obj(obj, cursor)
+        # match (switch) cases dont exist in this vs of python. Very sad
+        elif clss == Item:
             print("Creating Item")
-            create_item(obj, cursor)
+            obj = create_item(obj, cursor)
         elif clss == Trait:
             print("Creating Trait")
-            create_trait(obj, cursor)
+            obj = create_trait(obj, cursor)
         elif clss == Spell:
             print("Creating Spell")
-            create_spell(obj, cursor)
+            obj = create_spell(obj, cursor)
         else:
-            Exception("it broke, no give item")
-            
+            raise TypeError("it broke, no give item")
+
         cursor.close()
         conn.commit()
         print("Creation Successful")
+        return obj.id
 
     except:
         print(f"Error occured in {clss}")
         cursor.close()
         conn.rollback()
-    
+        return -1
 
-def add_requirements(obj,cursor):
+
+def add_requirements(obj, cursor):
     if obj.req != None and obj.req != []:
         query = "INSERT INTO requirements (object_id, type, value) VALUES "
         for rq in obj.req:
@@ -157,22 +168,22 @@ def add_requirements(obj,cursor):
                 typ = rq
                 val = 1
             query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
-        query = query[:-1]+";" # required to do magic for later
+        query = query[:-1]+";"  # required to do magic for later
         try:
             cursor.execute(query)
         except:
             print(query)
             Exception("Requirements query broke")
-    
+
     return obj
 
 
-def create_obj(obj, cursor): #item: Item
+def create_obj(obj, cursor):  # item: Item
     query = "INSERT INTO objects (name, effect) VALUES (%s, %s);"
     try:
         cursor.execute(query, (obj.name, obj.effect))
-        obj.id = cursor.lastrowid # needed in order to have an id for the next step
-        add_requirements(obj,cursor)
+        obj.id = cursor.lastrowid  # needed in order to have an id for the next step
+        add_requirements(obj, cursor)
     except:
         print(query)
         Exception("Creation Obj Broke")
@@ -181,13 +192,13 @@ def create_obj(obj, cursor): #item: Item
 
 # Route to create an item
 # @app.post("/items/", response_model=Item)
-def create_item(obj: Item, cursor): #item: Item
-    create_obj(obj,cursor)
+def create_item(obj: Item, cursor):  # item: Item
+    create_obj(obj, cursor)
     if obj.tags != None:
         query = "INSERT INTO items (id, cost, craft) VALUES (%s,%s,%s); INSERT INTO item_tags (item_id, name, value) VALUES "
         for tag in obj.tags:
             # print(tag)
-            if "damage" in tag: # damage is backwards...
+            if "damage" in tag:  # damage is backwards...
                 val, typ = tag.split(" ")
             elif " " in tag:
                 t = tag.split(" ")
@@ -198,13 +209,13 @@ def create_item(obj: Item, cursor): #item: Item
                     typ = tag
                     val = 0
                 # print(typ)
-                
+
             else:
                 typ = tag
                 val = 0
 
             query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
-        query = query[:-1]+";" # required to do magic for later
+        query = query[:-1]+";"  # required to do magic for later
         try:
             cursor.execute(query, (obj.id, obj.cost, obj.craft))
         except:
@@ -214,8 +225,8 @@ def create_item(obj: Item, cursor): #item: Item
     return obj
 
 
-def create_trait(obj: Trait, cursor): #item: Item
-    create_obj(obj,cursor)
+def create_trait(obj: Trait, cursor):  # item: Item
+    create_obj(obj, cursor)
     query = "INSERT INTO traits (id, dice, is_passive) VALUES (%s,%s,%s)"
     try:
         cursor.execute(query, (obj.id, obj.dice, obj.is_passive))
@@ -225,28 +236,27 @@ def create_trait(obj: Trait, cursor): #item: Item
     return obj
 
 
-
-def add_spell_tags(obj: Spell, cursor): #item: Item
+def add_spell_tags(obj: Spell, cursor):  # item: Item
     if obj.tags != None:
         query = "INSERT INTO spell_tags (spell_id, name) VALUES "
         for tag in obj.tags:
             query += f'({obj.id}, "{str(tag).lower()}"),'
-        query = query[:-1]+";" # required to do magic for later
+        query = query[:-1]+";"  # required to do magic for later
         try:
             cursor.execute(query)
         except:
             print(query)
             Exception("Spell Tag query Broke")
-        
+
     return obj
 
 
-def create_spell(obj, cursor): #item: Item
+def create_spell(obj, cursor):  # item: Item
     query = "INSERT INTO spells (name, effect, dice, level) VALUES (%s, %s, %s, %s);"
     try:
         cursor.execute(query, (obj.name, obj.effect, obj.dice, obj.level))
-        obj.id = cursor.lastrowid # needed in order to have an id for the next step
-        add_spell_tags(obj,cursor)
+        obj.id = cursor.lastrowid  # needed in order to have an id for the next step
+        add_spell_tags(obj, cursor)
     except:
         print(query)
         Exception("Spell query Broke")
@@ -265,10 +275,9 @@ def update_item(item, update_item: Item):
         cursor.execute(query)
         query = f"UPDATE items SET cost={update_item.craft}, craft={update_item.cost} WHERE id={item_id}"
         cursor.execute(query)
-        #TODO: Somehow we need to do tags down here
-        
-        #TODO: Somehow we need to do requirements down here
+        # TODO: Somehow we need to do tags down here
 
+        # TODO: Somehow we need to do requirements down here
 
         conn.commit()
         cursor.close()
@@ -279,6 +288,7 @@ def update_item(item, update_item: Item):
 
     return {"id": item_id}
 
+
 def update_trait(trait, update_trait: Trait):
     cursor = conn.cursor()
     item_id = read_object(trait)["id"]
@@ -287,9 +297,8 @@ def update_trait(trait, update_trait: Trait):
         cursor.execute(query)
         query = f"UPDATE traits SET dice={update_trait.dice}, is_passive={update_trait.is_passive} WHERE id={item_id}"
         cursor.execute(query)
-        #TODO: Somehow we need to do requirements down here
+        # TODO: Somehow we need to do requirements down here
 
-    
         conn.commit()
         cursor.close()
     except:
@@ -299,15 +308,15 @@ def update_trait(trait, update_trait: Trait):
 
     return {"id": item_id}
 
+
 def update_spell(spell, update_spell: Spell):
     cursor = conn.cursor()
     item_id = read_object(spell)["id"]
     try:
         query = f"UPDATE objects SET name={update_spell.name}, effect={update_spell.effect}, dice={update_spell.dice}, level={update_spell.level} WHERE id={item_id}"
         cursor.execute(query)
-        #TODO: Somehow we need to do spell traits down here
+        # TODO: Somehow we need to do spell traits down here
 
-    
         conn.commit()
         cursor.close()
     except:
@@ -350,13 +359,12 @@ def read_object(object_id):
     query = f"SELECT type, value FROM requirements WHERE object_id={item[0]}"
     cursor.execute(query)
     req = cleanup_tags(cursor.fetchall())
-    
-    
 
-    info = {"id": item[0], "name": item[1], "effect": item[2],"req":req}
-    
+    info = {"id": item[0], "name": item[1], "effect": item[2], "req": req}
+
     # traits
-    cursor.execute(f"SELECT dice, is_passive FROM traits WHERE id={info['id']}")
+    cursor.execute(
+        f"SELECT dice, is_passive FROM traits WHERE id={info['id']}")
     item = cursor.fetchone()
     if item != None:
         info["dice"] = item[0]
@@ -369,11 +377,10 @@ def read_object(object_id):
         info["cost"] = item[0]
         info["craft"] = item[1]
 
-        cursor.execute(f"SELECT name, value FROM item_tags WHERE item_id={info['id']}")
+        cursor.execute(
+            f"SELECT name, value FROM item_tags WHERE item_id={info['id']}")
         tags = cleanup_tags(cursor.fetchall())
         info["tags"] = tags
-
-
 
     cursor.close()
     return info
@@ -387,19 +394,20 @@ def read_spell(spell_quiry):
     except:
         err = "NAME"
         query = f'SELECT id, name, effect, dice, level FROM spells WHERE name="{str(spell_quiry).lower()}"'
-    
+
     cursor.execute(query)
     item = cursor.fetchone()
+
+    if item is None:
+        raise HTTPException(
+            status_code=404, detail=f"Item not found with {err} lookup")
 
     query = f"SELECT name FROM spell_tags WHERE spell_id={item[0]}"
     cursor.execute(query)
     tags = cleanup_tags(cursor.fetchall())
-    
-    if item is None:
-        raise HTTPException(status_code=404, detail=f"Item not found with {err} lookup")
 
     cursor.close()
-    return {"id": item[0], "name": item[1], "effect": item[2], "dice": item[3], "level": item[4], "tags":tags}
+    return {"id": item[0], "name": item[1], "effect": item[2], "dice": item[3], "level": item[4], "tags": tags}
 
 
 #######################################################################
@@ -409,17 +417,17 @@ def read_spell(spell_quiry):
 
 def delete_core(id: int, loc: str, cursor):
     id_types = {"spells": "id",
-        "spell_tags": "spell_id",
-        "traits": "id",
-        "objects": "id",
-        "item_tags": "item_id",
-        "items": "id",
-        "requirements": "object_id"}
-    
+                "spell_tags": "spell_id",
+                "traits": "id",
+                "objects": "id",
+                "item_tags": "item_id",
+                "items": "id",
+                "requirements": "object_id"}
+
     query = f"DELETE FROM {loc} WHERE {id_types[loc]}={id}"
     # print(query)
     cursor.execute(query)
-    
+
 
 def delete_item(item):
     item_id = read_object(item)["id"]
@@ -427,14 +435,14 @@ def delete_item(item):
     print(item_id)
     try:
         print("Del item tags")
-        delete_core(item_id,"item_tags",cursor)
-        
+        delete_core(item_id, "item_tags", cursor)
+
         print("Del item")
-        delete_core(item_id,"items",cursor)
+        delete_core(item_id, "items", cursor)
         print("Del requirements")
-        delete_core(item_id,"requirements",cursor)
+        delete_core(item_id, "requirements", cursor)
         print("Del object")
-        delete_core(item_id,"objects",cursor)
+        delete_core(item_id, "objects", cursor)
 
         print(f"Deleated {item} from database")
         conn.commit()
@@ -452,11 +460,11 @@ def delete_trait(trait):
     cursor = conn.cursor()
     try:
         print("Del traits")
-        delete_core(item_id,"traits",cursor)
+        delete_core(item_id, "traits", cursor)
         print("Del requirements")
-        delete_core(item_id,"requirements",cursor)
+        delete_core(item_id, "requirements", cursor)
         print("Del object")
-        delete_core(item_id,"objects",cursor)
+        delete_core(item_id, "objects", cursor)
 
         print(f"Deleated {trait} from database")
 
@@ -475,10 +483,10 @@ def delete_spell(spell):
     cursor = conn.cursor()
     try:
         print("Del spell tags")
-        delete_core(item_id,"spell_tags",cursor)
+        delete_core(item_id, "spell_tags", cursor)
         print("Del spell")
-        delete_core(item_id,"spells",cursor)
-        
+        delete_core(item_id, "spells", cursor)
+
         print(f"Deleated {spell} from database")
         conn.commit()
         cursor.close()
@@ -488,8 +496,6 @@ def delete_spell(spell):
         conn.rollback()
 
     return {"id": item_id}
-
-
 
 
 if __name__ == "__main__":
@@ -503,7 +509,7 @@ if __name__ == "__main__":
 
     # print(read_object(1))
 
-    print(do_query("SELECT * FROM objects"))
+    print(read_spell("pop rocks"))
 
     # print(read_spell(4))
 
