@@ -16,8 +16,14 @@ will include:
 
 ```
 python -m venv .venv
-.venv/Scripts/activate (or) source .venv/bin/activate
+.venv/Scripts/activate (Windows) (or) source .venv/bin/activate (Mac/Linux)
 ```
+
+If you run into a "cannot be loaded because running scripts is disabled on this system" error do:
+```
+Set-ExecutionPolicy Unrestricted -Scope Process
+```
+
 
 2. Install packages
 

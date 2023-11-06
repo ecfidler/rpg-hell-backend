@@ -42,6 +42,10 @@ app.add_middleware(
 )
 
 
+#######################################################################
+################################  Temp  ###############################
+#######################################################################
+
 @app.get("/")
 async def root():
     return {"message": "Hello, World!"}
@@ -52,8 +56,9 @@ async def open_query(query: str):
     """Takes in a raw SQL query. """
     return JSONResponse(content={"data": bl.open_query(query)}, status_code=status.HTTP_200_OK)
 
-# Object CRUD methods
-
+#######################################################################
+######################## Object CRUD methods ##########################
+#######################################################################
 
 # api.com/object/?name='something'
 @app.get("/object/", tags=["Objects"])
@@ -67,6 +72,10 @@ async def object_search(name: str):
 async def get_object_by_id(id: int):
     return JSONResponse(content={"data": bl.get_object(id)}, status_code=status.HTTP_200_OK)
 
+#######################################################################
+########################  Item CRUD methods  ##########################
+#######################################################################
+
 
 @app.put("/item/", tags=["Items"])
 async def put_item(name: str, effect: str, cost: int, craft: int, tags: str, req: str = ""):
@@ -78,6 +87,11 @@ async def put_item(name: str, effect: str, cost: int, craft: int, tags: str, req
         return JSONResponse(content={"data": res}, status_code=status.HTTP_200_OK)
 
 
+#######################################################################
+######################## Trait CRUD methods ###########################
+#######################################################################
+
+
 @app.put("/trait/", tags=["Traits"])
 async def put_trait(name: str, effect: str, req: str, dice: int, is_passive: bool):
     res = bl.create_trait(name, effect, req, dice, is_passive)
@@ -87,7 +101,10 @@ async def put_trait(name: str, effect: str, req: str, dice: int, is_passive: boo
     else:
         return JSONResponse(content={"data": res}, status_code=status.HTTP_200_OK)
 
-# Spell CRUD methods
+
+#######################################################################
+######################### Spell CRUD methods ##########################
+#######################################################################
 
 
 @app.get("/spell/", tags=["Spells"])

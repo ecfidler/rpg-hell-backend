@@ -1,13 +1,17 @@
 import MySQLdb
 from fastapi import HTTPException
-
+import json
+ 
 # Database configuration
-db_config = {
-    'host': 'shigure-djs',
-    'user': 'ethan',
-    'passwd': 'fidlerr',
-    'db': 'rpghelltest1',
-}
+with open('db_config.json') as json_file:
+    db_config = json.load(json_file)
+
+# db_config = {
+#     'host': 'shigure-djs',
+#     'user': 'ethan',
+#     'passwd': 'fidlerr',
+#     'db': 'rpghelltest1',
+# }
 
 # Create a connection to the database
 conn = MySQLdb.connect(**db_config)
@@ -340,6 +344,40 @@ def cleanup_tags(tags):
             t.append(str(tag[0]))
     return t
 
+def cleanup_req_large(traits,tags):
+    loc = 0 # so this is the item that tells what requirements go with what data
+    _id = tags[0][0] # get the first id
+    t = []
+    for tag in tags:
+        if tag[0] == _id:
+            t.append((tag[1],tag[2]))
+        else:
+            traits[loc]["req"] = cleanup_tags(t)
+            loc+=1
+            t = [(tag[1],tag[2])]
+            _id = tag[0]
+
+    traits[loc]["req"] = cleanup_tags(t) # so we dont skip the last line
+
+    return traits
+
+def cleanup_search_traits(items):
+    data,ids = [],[]
+    for item in items:
+        info = {"id": item[0], "name": item[1], "effect": item[2], "dice": item[3], "is_passive": item[4]}
+        data.append(info)
+        ids.append(item[0])
+    return data,ids
+
+def cleanup_search_items(items):
+    data,ids = [],[]
+    for item in items:
+        info = {"id": item[0], "name": item[1], "effect": item[2], "cost": item[3], "craft": item[4]}
+        data.append(info)
+        ids.append(item[0])
+    return data,ids
+
+
 
 def read_object(object_id):
     cursor = conn.cursor()
@@ -409,6 +447,24 @@ def read_spell(spell_quiry):
     cursor.close()
     return {"id": item[0], "name": item[1], "effect": item[2], "dice": item[3], "level": item[4], "tags": tags}
 
+
+def get_traits():
+    """
+    Returns all traits
+    """
+    cursor = conn.cursor()
+
+    query = f"SELECT objects.id, objects.name, objects.effect, traits.dice, traits.is_passive FROM objects INNER JOIN traits ON objects.id=traits.id;"
+    cursor.execute(query)
+    traits,ids = cleanup_search_traits(cursor.fetchall())
+    ids = str(ids)[1:-1] # remove the [] 
+
+    query = f"SELECT object_id, type, value FROM requirements WHERE object_id IN ({ids})"
+    cursor.execute(query)
+    cleanup_req_large(traits,cursor.fetchall())
+
+    cursor.close()
+    return traits,ids
 
 #######################################################################
 ########################### Delete Commands ###########################
@@ -509,7 +565,16 @@ if __name__ == "__main__":
 
     # print(read_object(1))
 
-    print(read_spell("pop rocks"))
+    # print(read_spell("pop rocks"))
+    print(get_traits()[0][-1])
+
+    # ids = [477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 624, 625, 626, 627, 628, 629]
+
+    # txt = ""
+    # for a in ids:
+    #     txt += f"({a}),"
+
+    # print(txt)
 
     # print(read_spell(4))
 
