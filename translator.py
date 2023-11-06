@@ -361,6 +361,46 @@ def cleanup_req_large(traits,tags):
 
     return traits
 
+
+def cleanup_item_req_large(items,tags):
+    loc = 0 # so this is the item that tells what requirements go with what data
+    _id = tags[0][0] # get the first id
+    t = []
+    for tag in tags:
+        if tag[0] == _id:
+            t.append((tag[1],tag[2]))
+        else:
+            while items[loc]["id"] != _id:
+                loc += 1
+            items[loc]["req"] = cleanup_tags(t)
+            loc+=1
+            t = [(tag[1],tag[2])]
+            _id = tag[0]
+    
+    while items[loc]["id"] != _id:
+        loc += 1
+    items[loc]["req"] = cleanup_tags(t) # so we dont skip the last line
+
+    return items
+
+
+def cleanup_tags_large(items,tags):
+    loc = 0 # so this is the item that tells what requirements go with what data
+    _id = tags[0][0] # get the first id
+    t = []
+    for tag in tags:
+        if tag[0] == _id:
+            t.append((tag[1],tag[2]))
+        else:
+            items[loc]["tags"] = cleanup_tags(t)
+            loc+=1
+            t = [(tag[1],tag[2])]
+            _id = tag[0]
+
+    items[loc]["req"] = cleanup_tags(t) # so we dont skip the last line
+
+    return items
+
 def cleanup_search_traits(items):
     data,ids = [],[]
     for item in items:
@@ -457,14 +497,34 @@ def get_traits():
     query = f"SELECT objects.id, objects.name, objects.effect, traits.dice, traits.is_passive FROM objects INNER JOIN traits ON objects.id=traits.id;"
     cursor.execute(query)
     traits,ids = cleanup_search_traits(cursor.fetchall())
-    ids = str(ids)[1:-1] # remove the [] 
 
-    query = f"SELECT object_id, type, value FROM requirements WHERE object_id IN ({ids})"
+    query = f"SELECT object_id, type, value FROM requirements WHERE object_id IN ({str(ids)[1:-1]})" # remove the [] from ids
     cursor.execute(query)
     cleanup_req_large(traits,cursor.fetchall())
 
     cursor.close()
     return traits,ids
+
+def get_items():
+    """
+    Returns all traits
+    """
+    cursor = conn.cursor()
+
+    query = f"SELECT objects.id, objects.name, objects.effect, items.cost, items.craft FROM objects INNER JOIN items ON objects.id=items.id;"
+    cursor.execute(query)
+    items,ids = cleanup_search_items(cursor.fetchall())
+
+    query = f"SELECT item_id, name, value FROM item_tags WHERE item_id IN ({str(ids)[1:-1]})"# remove the []
+    cursor.execute(query)
+    cleanup_tags_large(items,cursor.fetchall())
+
+    query = f"SELECT object_id, type, value FROM requirements WHERE object_id IN ({str(ids)[1:-1]})" # remove the []
+    cursor.execute(query)
+    cleanup_item_req_large(items,cursor.fetchall())
+
+    cursor.close()
+    return items,ids
 
 #######################################################################
 ########################### Delete Commands ###########################
@@ -566,9 +626,12 @@ if __name__ == "__main__":
     # print(read_object(1))
 
     # print(read_spell("pop rocks"))
-    print(get_traits()[0][-1])
+    print(get_items())
 
     # ids = [477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 624, 625, 626, 627, 628, 629]
+
+    # [{1,stuff},{3,stuff},{63,stuff}] 
+    # [[(1,name,val),(1,name,val)], [], [(63,name,val)],]
 
     # txt = ""
     # for a in ids:
