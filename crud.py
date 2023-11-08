@@ -12,16 +12,29 @@ def get_object(id: int):
     return dl.read_object(id)
 
 
-def object_search(name: str):  # todo: add other search params
+# todo: add other search params & support returning multiple results
+def object_search(name: str):
     return dl.read_object(name)
+
+
+def get_all_traits():
+    return dl.get_traits()
+
+
+def get_all_items():
+    return dl.get_items()
 
 
 def get_spell(id: int):
     return dl.read_spell(id)
 
 
-def spell_search(name: str):  # todo: add other search params
+# todo: add other search params & support returning multiple results
+def spell_search(name: str):
     return dl.read_spell(name)
+
+# def get_all_spells():
+#     return
 
 
 def create_spell(name: str, effect: str, dice: int, level: int, tags: str):

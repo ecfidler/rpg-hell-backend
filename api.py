@@ -89,6 +89,11 @@ async def put_item(name: str, effect: str, cost: int, craft: int, tags: str, req
         return JSONResponse(content={"data": res}, status_code=status.HTTP_200_OK)
 
 
+@app.get("/items/", tags=["Items"])
+async def get_all_items():
+    res = crud.get_all_items()
+    return JSONResponse(content={"data": res[0], "ids": res[1]}, status_code=status.HTTP_200_OK)
+
 #######################################################################
 ######################## Trait CRUD methods ###########################
 #######################################################################
@@ -104,6 +109,11 @@ async def put_trait(name: str, effect: str, req: str, dice: int, is_passive: boo
         return JSONResponse(content={"data": res}, status_code=status.HTTP_200_OK)
 
 
+@app.get("/traits/", tags=["Traits"])
+async def get_all_traits():
+    res = crud.get_all_traits()
+    return JSONResponse(content={"data": res[0], "ids": res[1]}, status_code=status.HTTP_200_OK)
+
 #######################################################################
 ######################### Spell CRUD methods ##########################
 #######################################################################
@@ -116,8 +126,9 @@ async def spell_search(name: str):
 
 
 # @app.get("/spells/", tags=["Spells"])
-# async def get_spells():
-#     return JSONResponse(content={"data": crud.get_spells()}, status_code=status.HTTP_200_OK)
+# async def get_all_spells():
+#     res = crud.get_all_spells()
+#     return JSONResponse(content={"data": res[0], "ids": res[1]}, status_code=status.HTTP_200_OK)
 
 
 @app.get("/spell/{id}", tags=["Spells"])
