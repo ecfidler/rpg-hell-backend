@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from typing import Annotated
 
 import crud
+from models import Trait, Item, Spell
 
 tags = [
     {
@@ -82,13 +83,13 @@ async def get_object_by_id(id: Annotated[int, Path(title="The ID of the object t
 
 
 @app.put("/item/", tags=["Items"])
-async def put_item(name: str, effect: str, cost: int, craft: int, tags: str, req: Annotated[str, Query(default="")]):
-    res = crud.create_item(name, effect, cost, craft, tags, req)
+async def put_item(item: Item):
+    res = crud.create_item(item)
     if (res == -1):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"it failed and we don't have proper error catching yet 😨")
     else:
-        return JSONResponse(content={"data": res}, status_code=status.HTTP_200_OK)
+        return JSONResponse(content={"id": res}, status_code=status.HTTP_200_OK)
 
 
 @app.get("/items/", tags=["Items"])
@@ -102,13 +103,14 @@ async def get_all_items():
 
 
 @app.put("/trait/", tags=["Traits"])
-async def put_trait(name: str, effect: str, req: str, dice: int, is_passive: bool):
-    res = crud.create_trait(name, effect, req, dice, is_passive)
+# Annotated[Trait, Query(title="The new trait to be added")]
+async def put_trait(trait: Trait):
+    res = crud.create_trait(trait)
     if (res == -1):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"it failed and we don't have proper error catching yet 😨")
     else:
-        return JSONResponse(content={"data": res}, status_code=status.HTTP_200_OK)
+        return JSONResponse(content={"id": res}, status_code=status.HTTP_200_OK)
 
 
 @app.get("/traits/", tags=["Traits"])
@@ -127,10 +129,10 @@ async def spell_search(name: str):
     return JSONResponse(content={"data": crud.spell_search(name)}, status_code=status.HTTP_200_OK)
 
 
-# @app.get("/spells/", tags=["Spells"])
-# async def get_all_spells():
-#     res = crud.get_all_spells()
-#     return JSONResponse(content={"data": res[0], "ids": res[1]}, status_code=status.HTTP_200_OK)
+@app.get("/spells/", tags=["Spells"])
+async def get_all_spells():
+    res = crud.get_all_spells()
+    return JSONResponse(content={"data": res[0], "ids": res[1]}, status_code=status.HTTP_200_OK)
 
 
 @app.get("/spell/{id}", tags=["Spells"])
@@ -139,13 +141,13 @@ async def get_spell_by_id(id: Annotated[int, Path(title="The ID of the spell to 
 
 
 @app.put("/spell/", tags=["Spells"])
-async def put_spell(name: str, effect: str, dice: int, level: int, tags: str):
-    res = crud.create_spell(name, effect, dice, level, tags)
+async def put_spell(spell: Spell):
+    res = crud.create_spell(spell)
     if (res == -1):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"it failed and we don't have proper error catching yet 😨")
     else:
-        return JSONResponse(content={"data": res}, status_code=status.HTTP_200_OK)
+        return JSONResponse(content={"id": res}, status_code=status.HTTP_200_OK)
 
 '''
 

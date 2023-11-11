@@ -30,7 +30,7 @@ CREATE TABLE `spells` (
 CREATE TABLE `spell_tags` (
   `tag_id` INTEGER PRIMARY KEY AUTO_INCREMENT,
   `spell_id` integer COMMENT 'Foreign Key',
-  `name` text COMMENT '1-8: AOE,Attack,CC,Damage,Focus,Ranged,Touch,Utility'
+  `name` text COMMENT 'AOE,Attack,CC,Damage,Focus,Ranged,Touch,Utility'
 );
 
 CREATE TABLE `items` (

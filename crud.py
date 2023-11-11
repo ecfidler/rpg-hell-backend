@@ -1,5 +1,5 @@
-from translator import Trait, Item, Spell, spliter
-import translator as dl  # do_query, create, read_object, read_spell
+from models import Trait, Item, Spell
+import data_connector as dl  # do_query, create, read_object, read_spell
 
 # open query
 
@@ -33,20 +33,21 @@ def get_spell(id: int):
 def spell_search(name: str):
     return dl.read_spell(name)
 
-# def get_all_spells():
-#     return
+
+def get_all_spells():
+    return dl.get_spells()
 
 
-def create_spell(name: str, effect: str, dice: int, level: int, tags: str):
-    spell = Spell(name, effect, dice, level, spliter(tags))
+def create_spell(spell: Spell):
+    # spell = Spell(name, effect, dice, level, spliter(tags))
     return dl.create(spell)
 
 
-def create_trait(name: str, effect: str, req: str, dice: int, is_passive: bool):
-    trait = Trait(name, effect, spliter(req), dice, is_passive)
+def create_trait(trait: Trait):
+    # trait = Trait(name, effect, spliter(req), dice, is_passive)
     return dl.create(trait)
 
 
-def create_item(name: str, effect: str, cost: int, craft: int, tags: str, req: str = ""):
-    item = Item(name, effect, cost, craft, spliter(tags), spliter(req))
+def create_item(item: Item):
+    # item = Item(name, effect, cost, craft, spliter(tags), spliter(req))
     return dl.create(item)
