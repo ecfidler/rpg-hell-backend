@@ -1,7 +1,9 @@
-from fastapi import FastAPI, HTTPException, status, Response
+from fastapi import FastAPI, HTTPException, status, Response, Path, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi.responses import JSONResponse
+
+from typing import Annotated
 
 import crud
 
@@ -71,7 +73,7 @@ async def object_search(name: str):
 
 # api.example.com/object/5
 @app.get("/object/{id}", tags=["Objects"])
-async def get_object_by_id(id: int):
+async def get_object_by_id(id: Annotated[int, Path(title="The ID of the object to get")]):
     return JSONResponse(content={"data": crud.get_object(id)}, status_code=status.HTTP_200_OK)
 
 #######################################################################
@@ -80,7 +82,7 @@ async def get_object_by_id(id: int):
 
 
 @app.put("/item/", tags=["Items"])
-async def put_item(name: str, effect: str, cost: int, craft: int, tags: str, req: str = ""):
+async def put_item(name: str, effect: str, cost: int, craft: int, tags: str, req: Annotated[str, Query(default="")]):
     res = crud.create_item(name, effect, cost, craft, tags, req)
     if (res == -1):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -132,7 +134,7 @@ async def spell_search(name: str):
 
 
 @app.get("/spell/{id}", tags=["Spells"])
-async def get_spell_by_id(id: int):
+async def get_spell_by_id(id: Annotated[int, Path(title="The ID of the spell to get")]):
     return JSONResponse(content={"data": crud.get_spell(int)}, status_code=status.HTTP_200_OK)
 
 
