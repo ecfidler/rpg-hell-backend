@@ -6,7 +6,8 @@
     "compounds": [
         {
             "name": "Launch API to Swagger",
-            "configurations": ["Python: FastAPI", "Launch Firefox to API docs"]
+            "configurations": ["Python: FastAPI", "Launch Firefox to API docs"],
+            "stopAll": true
         }
     ],
     "configurations": [
