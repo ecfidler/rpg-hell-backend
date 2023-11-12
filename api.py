@@ -105,7 +105,7 @@ async def get_all_items():
 #     return JSONResponse(content={"data": update_item(id, item)}, status_code=status.HTTP_200_OK)
 
 
-@app.delete("item/{id}", tags=["Item"])
+@app.delete("item/{id}", tags=["Items"])
 async def delete_item(id: int):
     return JSONResponse(content={"data": delete_item(id)}, status_code=status.HTTP_200_OK)
 
@@ -136,7 +136,7 @@ async def get_all_traits():
 #     return JSONResponse(content={"data": crud.update_trait(id, trait)}, status_code=status.HTTP_200_OK)
 
 
-@app.delete("/trait/{id}", tags=["Trait"])
+@app.delete("/trait/{id}", tags=["Traits"])
 async def delete_trait(id: int):
     return JSONResponse(content={"data": crud.delete_trait(id)}, status_code=status.HTTP_200_OK)
 
