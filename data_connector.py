@@ -1,9 +1,16 @@
 
 import json
 import MySQLdb
-from fastapi import HTTPException
+from fastapi import HTTPException, Query
+
 
 from models import Object, Item, Trait, Spell
+
+from data_con_modules.data_con_create import create_obj, create_item, create_trait, create_spell
+# from data_con_modules.data_con_update import update_item, update_spell, update_trait
+from data_con_modules.data_con_del import delete_core
+from data_con_modules.data_con_read import cleanup_tags, cleanup_tags_large, cleanup_search_items, cleanup_search_traits, cleanup_item_req_large, cleanup_req_large
+from data_con_modules.data_con_filter import cleanup_filter, get_filter_query
 
 # Database configuration
 with open('db_config.json') as json_file:
@@ -78,272 +85,14 @@ def create(obj):
         return -1
 
 
-def add_requirements(obj, cursor):
-    if obj.req != None and obj.req != []:
-        query = "INSERT INTO requirements (object_id, type, value) VALUES "
-        for rq in obj.req:
-            if " " in rq:
-                typ, val = rq.split(" ")
-            else:
-                typ = rq
-                val = 1
-            query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
-        query = query[:-1]+";"  # required to do magic for later
-        try:
-            cursor.execute(query)
-        except:
-            print(query)
-            Exception("Requirements query broke")
-
-    return obj
-
-
-def create_obj(obj, cursor):  # item: Item
-    query = "INSERT INTO objects (name, effect) VALUES (%s, %s);"
-    try:
-        cursor.execute(query, (obj.name, obj.effect))
-        obj.id = cursor.lastrowid  # needed in order to have an id for the next step
-        add_requirements(obj, cursor)
-    except:
-        print(query)
-        Exception("Creation Obj Broke")
-    return obj
-
-
-# Route to create an item
-# @app.post("/items/", response_model=Item)
-def create_item(obj: Item, cursor):  # item: Item
-    create_obj(obj, cursor)
-    if obj.tags != None:
-        query = "INSERT INTO items (id, cost, craft) VALUES (%s,%s,%s); INSERT INTO item_tags (item_id, name, value) VALUES "
-        for tag in obj.tags:
-            # print(tag)
-            if "damage" in tag:  # damage is backwards...
-                val, typ = tag.split(" ")
-            elif " " in tag:
-                t = tag.split(" ")
-                # print(t)
-                try:
-                    typ, val = " ".join(t[:-1]), int(t[-1])
-                except:
-                    typ = tag
-                    val = 0
-                # print(typ)
-
-            else:
-                typ = tag
-                val = 0
-
-            query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
-        query = query[:-1]+";"  # required to do magic for later
-        try:
-            cursor.execute(query, (obj.id, obj.cost, obj.craft))
-        except:
-            print(query)
-            Exception("Item query Broke")
-        # print(query)
-    return obj
-
-
-def create_trait(obj: Trait, cursor):  # item: Item
-    create_obj(obj, cursor)
-    query = "INSERT INTO traits (id, dice, is_passive) VALUES (%s,%s,%s)"
-    try:
-        cursor.execute(query, (obj.id, obj.dice, obj.is_passive))
-    except:
-        print(query)
-        Exception("Trait query Broke")
-    return obj
-
-
-def add_spell_tags(obj: Spell, cursor):  # item: Item
-    if obj.tags != None:
-        query = "INSERT INTO spell_tags (spell_id, name) VALUES "
-        for tag in obj.tags:
-            query += f'({obj.id}, "{str(tag).lower()}"),'
-        query = query[:-1]+";"  # required to do magic for later
-        try:
-            cursor.execute(query)
-        except:
-            print(query)
-            Exception("Spell Tag query Broke")
-
-    return obj
-
-
-def create_spell(obj, cursor):  # item: Item
-    query = "INSERT INTO spells (name, effect, dice, level) VALUES (%s, %s, %s, %s);"
-    try:
-        cursor.execute(query, (obj.name, obj.effect, obj.dice, obj.level))
-        obj.id = cursor.lastrowid  # needed in order to have an id for the next step
-        add_spell_tags(obj, cursor)
-    except:
-        print(query)
-        Exception("Spell query Broke")
-    return obj
-
 #######################################################################
 ########################### Update Commands ###########################
 #######################################################################
 
 
-def update_item(item, update_item: Item):
-    cursor = conn.cursor()
-    item_id = read_object(item)["id"]
-    try:
-        query = f"UPDATE objects SET name={update_item.name}, effect={update_item.effect} WHERE id={item_id}"
-        cursor.execute(query)
-        query = f"UPDATE items SET cost={update_item.craft}, craft={update_item.cost} WHERE id={item_id}"
-        cursor.execute(query)
-        # TODO: Somehow we need to do tags down here
-
-        # TODO: Somehow we need to do requirements down here
-
-        conn.commit()
-        cursor.close()
-    except:
-        print("Update item error")
-        cursor.close()
-        conn.rollback()
-
-    return {"id": item_id}
-
-
-def update_trait(trait, update_trait: Trait):
-    cursor = conn.cursor()
-    item_id = read_object(trait)["id"]
-    try:
-        query = f"UPDATE objects SET name={update_trait.name}, effect={update_trait.effect} WHERE id={item_id}"
-        cursor.execute(query)
-        query = f"UPDATE traits SET dice={update_trait.dice}, is_passive={update_trait.is_passive} WHERE id={item_id}"
-        cursor.execute(query)
-        # TODO: Somehow we need to do requirements down here
-
-        conn.commit()
-        cursor.close()
-    except:
-        print("Update trait error")
-        cursor.close()
-        conn.rollback()
-
-    return {"id": item_id}
-
-
-def update_spell(spell, update_spell: Spell):
-    cursor = conn.cursor()
-    item_id = read_object(spell)["id"]
-    try:
-        query = f"UPDATE objects SET name={update_spell.name}, effect={update_spell.effect}, dice={update_spell.dice}, level={update_spell.level} WHERE id={item_id}"
-        cursor.execute(query)
-        # TODO: Somehow we need to do spell traits down here
-
-        conn.commit()
-        cursor.close()
-    except:
-        print("Update trait error")
-        cursor.close()
-        conn.rollback()
-
-    return {"id": item_id}
-
-
 #######################################################################
 ############################ Read Commands ############################
 #######################################################################
-
-def cleanup_tags(tags):
-    t = []
-    for tag in tags:
-        if len(tag) == 2:
-            t.append(f"{tag[0]} {tag[1]}")
-        else:
-            t.append(str(tag[0]))
-    return t
-
-
-def cleanup_req_large(traits, tags):
-    loc = 0  # so this is the item that tells what requirements go with what data
-    _id = tags[0][0]  # get the first id
-    t = []
-    for tag in tags:
-        if tag[0] == _id:
-            t.append((tag[1], tag[2]))
-        else:
-            traits[loc]["req"] = cleanup_tags(t)
-            loc += 1
-            t = [(tag[1], tag[2])]
-            _id = tag[0]
-
-    traits[loc]["req"] = cleanup_tags(t)  # so we dont skip the last line
-
-    return traits
-
-
-def cleanup_item_req_large(items, tags):
-    loc = 0  # so this is the item that tells what requirements go with what data
-    _id = tags[0][0]  # get the first id
-    t = []
-    for tag in tags:
-        if tag[0] == _id:
-            t.append((tag[1], tag[2]))
-        else:
-            while items[loc]["id"] != _id:
-                loc += 1
-            items[loc]["req"] = cleanup_tags(t)
-            loc += 1
-            t = [(tag[1], tag[2])]
-            _id = tag[0]
-
-    while items[loc]["id"] != _id:
-        loc += 1
-    items[loc]["req"] = cleanup_tags(t)  # so we dont skip the last line
-
-    return items
-
-
-def cleanup_tags_large(items, tags):
-    loc = 0  # so this is the item that tells what requirements go with what data
-    _id = tags[0][0]  # get the first id
-    t = []
-    for tag in tags:
-        if tag[0] == _id:
-            try:
-                t.append((tag[1], tag[2]))
-            except:
-                t.append((tag[1],))
-        else:
-            items[loc]["tags"] = cleanup_tags(t)
-            loc += 1
-            try:
-                t = [(tag[1], tag[2])]
-            except:
-                t = [(tag[1],)]
-            # t = [(tag[1], tag[2])]
-            _id = tag[0]
-
-    items[loc]["req"] = cleanup_tags(t)  # so we dont skip the last line
-
-    return items
-
-
-def cleanup_search_traits(items):
-    data, ids = [], []
-    for item in items:
-        info = {"id": item[0], "name": item[1], "effect": item[2],
-                "dice": item[3], "is_passive": item[4]}
-        data.append(info)
-        ids.append(item[0])
-    return data, ids
-
-
-def cleanup_search_items(items):
-    data, ids = [], []
-    for item in items:
-        info = {"id": item[0], "name": item[1],
-                "effect": item[2], "cost": item[3], "craft": item[4]}
-        data.append(info)
-        ids.append(item[0])
-    return data, ids
 
 
 def read_object(object_id):
@@ -413,6 +162,7 @@ def read_spell(spell_quiry):
 
     cursor.close()
     return {"id": item[0], "name": item[1], "effect": item[2], "dice": item[3], "level": item[4], "tags": tags}
+
 
 
 def get_traits(_ids:list[int]=[]):
@@ -494,19 +244,6 @@ def get_spells(_ids:list[int]=[]):
 #######################################################################
 
 
-def delete_core(id: int, loc: str, cursor):
-    id_types = {"spells": "id",
-                "spell_tags": "spell_id",
-                "traits": "id",
-                "objects": "id",
-                "item_tags": "item_id",
-                "items": "id",
-                "requirements": "object_id"}
-
-    query = f"DELETE FROM {loc} WHERE {id_types[loc]}={id}"
-    # print(query)
-    cursor.execute(query)
-
 
 def delete_item(item):
     item_id = read_object(item)["id"]
@@ -582,12 +319,6 @@ def delete_spell(spell):
 #######################################################################
 
 
-def cleanup_filter(items):
-    ids = []
-    for item in items:
-        ids.append(item[0])
-    return ids
-
 
 def filter_base(loc: str, reqs: list[str]=[],tags: list[str]=[]):
     # SELECT DISTINCT id, name FROM objects WHERE id IN 
@@ -597,56 +328,8 @@ def filter_base(loc: str, reqs: list[str]=[],tags: list[str]=[]):
     # )
 
     cursor = conn.cursor()
-
-    places = {"objects": "objects",
-              "traits": "objects",
-              "items": "objects",
-              "spells": "spells"}
-    place_tags = {"items": ["item_tags","item_id"], "spells": ["spell_tags","spell_id"]}
-
-    query = f"SELECT DISTINCT id FROM {places[loc]} WHERE id IN ("
-    if len(reqs): # check for items in req
-        query += "(SELECT object_id FROM requirements WHERE "
-        first = True
-        for req in reqs:
-            name, val = req.split(" ")
-
-            if not first:
-                query += "AND "
-            else:
-                first = False
-
-            query += f'object_id IN (SELECT object_id FROM requirements WHERE `type` IN ("{name}") AND `value` IN ({val})) '
-        
-        query = query[:-1]+") " # lop off extra space and add end
     
-    if len(tags): # check for items in req
-        if len(reqs): # this does not work... sql bullll
-            query += "AND "
-
-        query += f"(SELECT {place_tags[loc][1]} FROM {place_tags[loc][0]} WHERE "
-        first = True
-        for tag in tags:
-            if not first:
-                query += "AND "
-            else:
-                first = False
-
-            try:
-                name, val = tag.split(" ")
-                query += f'{place_tags[loc][1]} IN (SELECT {place_tags[loc][1]} FROM {place_tags[loc][0]} WHERE `name` IN ("{name}") AND `value` IN ({val})) '
-        
-            except: # for spells
-                query += f'{place_tags[loc][1]} IN (SELECT {place_tags[loc][1]} FROM {place_tags[loc][0]} WHERE `name` IN ("{tag}")) '
-            
-        query = query[:-1]+") " # lop off extra space and add end
-    
-
-
-    query = query[:-1]+")"
-    
-
-    
+    query = get_filter_query(loc,reqs,tags)
 
     # print(query)
     cursor.execute(query)
@@ -656,7 +339,7 @@ def filter_base(loc: str, reqs: list[str]=[],tags: list[str]=[]):
     return ids
 
 
-def filter_traits(reqs:list[str]):
+def filter_traits_by_reqs(reqs:list[str]):
     ids = filter_base("traits",reqs)
     data, ids = get_traits(ids)
     return data, ids
@@ -671,7 +354,7 @@ def filter_items_by_tags(tags:list[str]):
     data, ids = get_items(ids)
     return data, ids
 
-def filter_spells(tags:list[str]):
+def filter_spells_by_tags(tags:list[str]):
     ids = filter_base("spells",[],tags)
     data, ids = get_spells(ids)
     return data, ids
@@ -700,7 +383,7 @@ if __name__ == "__main__":
     # print(filter_spells(["touch","utility"]))
     # print(filter_traits(["soul 2","body 1"]))
     # print(filter_items_by_reqs(["body 2"]))
-    print(filter_items_by_tags(["small",'potion']))
+    # print(filter_items_by_tags(["small",'potion']))
 
 
     # ids = [477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 624, 625, 626, 627, 628, 629]
