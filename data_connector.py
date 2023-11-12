@@ -565,8 +565,82 @@ def delete_spell(spell):
 
 
 #######################################################################
-########################### Search Commands ###########################
+########################### Filter Commands ###########################
 #######################################################################
+
+
+def cleanup_filter(items):
+    ids = []
+    for item in items:
+        ids.append(item[0])
+    return ids
+
+
+def filter_base(loc: str, reqs: list[str]=[],tags: list[str]=[]):
+    # SELECT DISTINCT id, name FROM objects WHERE id IN 
+    # (SELECT object_id FROM requirements WHERE 
+    # object_id IN (SELECT object_id FROM requirements WHERE `type` IN ("Body") AND `value` IN (2))
+    # AND object_id IN (SELECT object_id FROM requirements WHERE `type` IN ("mind") AND `value` IN (1))
+    # )
+
+    cursor = conn.cursor()
+
+    places = {"objects": "objects",
+              "traits": "objects",
+              "items": "objects",
+              "spells": "spells"}
+    place_tags = {"items": ["item_tags","item_id"], "spells": ["spell_tags","spell_id"]}
+
+    query = f"SELECT DISTINCT id FROM {places[loc]} WHERE id IN ("
+    if len(reqs): # check for items in req
+        query += "(SELECT object_id FROM requirements WHERE "
+        first = True
+        for req in reqs:
+            name, val = req.split(" ")
+
+            if not first:
+                query += "AND "
+            else:
+                first = False
+
+            query += f'object_id IN (SELECT object_id FROM requirements WHERE `type` IN ("{name}") AND `value` IN ({val})) '
+        
+        query = query[:-1]+") " # lop off extra space and add end
+    
+    if len(tags): # check for items in req
+        if len(reqs): # this does not work... sql bullll
+            query += "AND "
+
+        query += f"(SELECT {place_tags[loc][1]} FROM {place_tags[loc][0]} WHERE "
+        first = True
+        for tag in tags:
+            if not first:
+                query += "AND "
+            else:
+                first = False
+
+            try:
+                name, val = tag.split(" ")
+                query += f'{place_tags[loc][1]} IN (SELECT {place_tags[loc][1]} FROM {place_tags[loc][0]} WHERE `name` IN ("{name}") AND `value` IN ({val})) '
+        
+            except: # for spells
+                query += f'{place_tags[loc][1]} IN (SELECT {place_tags[loc][1]} FROM {place_tags[loc][0]} WHERE `name` IN ("{tag}")) '
+            
+        query = query[:-1]+") " # lop off extra space and add end
+    
+
+
+    query = query[:-1]+")"
+    
+
+    
+
+    # print(query)
+    cursor.execute(query)
+    ids = cleanup_filter(cursor.fetchall())
+
+    cursor.close()
+    return ids
 
 
 if __name__ == "__main__":
@@ -581,7 +655,8 @@ if __name__ == "__main__":
     # print(read_object(1))
 
     # print(read_spell("pop rocks"))
-    print(get_items())
+    # print(get_items())
+    print(filter_base("spells",[],["touch"])) # Fails if given both at the same time but works seprately
 
     # ids = [477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 624, 625, 626, 627, 628, 629]
 
