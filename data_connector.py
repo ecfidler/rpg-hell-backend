@@ -9,7 +9,7 @@ from models import Object, Item, Trait, Spell
 from data_con_modules.data_con_create import create_obj, create_item, create_trait, create_spell
 # from data_con_modules.data_con_update import update_item, update_spell, update_trait
 from data_con_modules.data_con_del import delete_core
-from data_con_modules.data_con_read import cleanup_tags, cleanup_search_items, cleanup_search_traits, cleanup_bits_bobs
+from data_con_modules.data_con_read import cleanup_tags, cleanup_search, cleanup_bits_bobs
 from data_con_modules.data_con_filter import cleanup_filter, get_filter_query
 
 # Database configuration
@@ -176,7 +176,7 @@ def get_traits(_ids:list[int]=[]):
     else:
         query = f"SELECT objects.id, objects.name, objects.effect, traits.dice, traits.is_passive FROM objects INNER JOIN traits ON objects.id=traits.id;"
     cursor.execute(query)
-    traits, ids = cleanup_search_traits(cursor.fetchall())
+    traits, ids = cleanup_search(cursor.fetchall())
 
     # remove the [] from ids
     query = f"SELECT object_id, type, value FROM requirements WHERE object_id IN ({str(ids)[1:-1]})"
@@ -200,7 +200,7 @@ def get_items(_ids:list[int]=[]):
     
     # print(query)
     cursor.execute(query)
-    items, ids = cleanup_search_items(cursor.fetchall())
+    items, ids = cleanup_search(cursor.fetchall(),"items")
 
     # remove the []
     query = f"SELECT item_id, name, value FROM item_tags WHERE item_id IN ({str(ids)[1:-1]})"
@@ -231,11 +231,12 @@ def get_spells(_ids:list[int]=[]):
 
 
     cursor.execute(query)
-    spells, ids = cleanup_search_items(cursor.fetchall())
+    spells, ids = cleanup_search(cursor.fetchall(),"spells")
 
     # remove the []
     query = f"SELECT spell_id, name FROM spell_tags WHERE spell_id IN ({str(ids)[1:-1]})"
     cursor.execute(query)
+    # print(cursor.fetchall())
     cleanup_bits_bobs(spells, cursor.fetchall(),'tags')
 
     cursor.close()
@@ -394,7 +395,7 @@ if __name__ == "__main__":
     # print(read_spell("poprocks"))
     # print(get_items())
     # print(get_traits())
-    # print(get_spells())
+    # print(get_spells([1]))
     
     
     # print(filter_base("spells",[],["touch"])) # Fails if given both at the same time but works seprately
