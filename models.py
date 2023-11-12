@@ -81,3 +81,13 @@ class Spell(BaseModel):
 
     def return_data(self):
         return {"id": self.id, "name": self.name, "effect": self.effect, "dice": self.dice, "level": self.level, "tags": self.tags}
+
+
+class User(BaseModel):
+    username: str
+    email: str
+    is_admin: bool = False
+
+
+class UserDBModel(User):
+    hashed_password: str

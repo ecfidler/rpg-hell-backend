@@ -1,6 +1,6 @@
-from fastapi import FastAPI, HTTPException, status, Response, Path, Query
+from fastapi import FastAPI, HTTPException, status, Response, Path, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
-
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 
 from typing import Annotated
@@ -8,7 +8,9 @@ from typing import Annotated
 from sqlalchemy import JSON
 
 import crud
-from models import Trait, Item, Spell
+from models import Trait, Item, Spell, User, UserDBModel
+
+import auth
 
 tags = [
     {
@@ -30,6 +32,14 @@ tags = [
     {
         "name": "Items",
         "description": ""
+    },
+    {
+        "name": "Users",
+        "description": "RPG-Hell user accounts"
+    },
+    {
+        "name": "Security",
+        "description": "OAuth2 & login routes"
     }
 ]
 
@@ -46,10 +56,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+#######################################################################
+##########################  Authentication  ###########################
+#######################################################################
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    user = auth.fake_decode_token(token)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user
+
+
+@app.get("/users/me", tags=["Users"])
+async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
+    return current_user
+
+
+@app.post("/token")
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    user_dict = auth.fake_users_db.get(form_data.username)
+    if not user_dict:
+        raise HTTPException(
+            status_code=400, detail="Incorrect username or password")
+    user = UserDBModel(**user_dict)
+    hashed_password = auth.fake_hash_password(form_data.password)
+    if not hashed_password == user.hashed_password:
+        raise HTTPException(
+            status_code=400, detail="Incorrect username or password")
+    return {"access_token": user.username, "token_type": "bearer"}
 
 #######################################################################
 ################################  Temp  ###############################
 #######################################################################
+
 
 @app.get("/")
 async def root():
@@ -85,7 +131,7 @@ async def get_object_by_id(id: Annotated[int, Path(title="The ID of the object t
 
 
 @app.put("/item/", tags=["Items"])
-async def put_item(item: Item):
+async def put_item(item: Item, token: Annotated[str, Depends(oauth2_scheme)]):
     res = crud.create_item(item)
     if (res == -1):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
