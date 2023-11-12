@@ -14,7 +14,20 @@ def get_filter_query(loc: str, reqs: list[str]=[],tags: list[str]=[]):
     place_tags = {"items": ["item_tags","item_id"], "spells": ["spell_tags","spell_id"]}
 
     query = f"SELECT DISTINCT id FROM {places[loc]} WHERE id IN ("
-    if len(reqs): # check for items in req
+    # query = ""
+    if len(reqs) == 1:
+        name, val = reqs[0].split(" ")
+        # SELECT DISTINCT id, name FROM objects WHERE id IN 
+        # (SELECT object_id FROM requirements WHERE `type` IN ("body")
+        # AND id IN 
+        # (SELECT object_id FROM requirements GROUP BY object_id HAVING COUNT(*) = 1)
+        # )
+        query += f'''
+                    (SELECT object_id FROM requirements WHERE `type` IN ("{name}") AND `value` IN ({val})
+                    AND object_id IN (SELECT object_id FROM requirements GROUP BY object_id HAVING COUNT(*) = 1))
+                '''
+        
+    elif len(reqs): # check for items in req
         query += "(SELECT object_id FROM requirements WHERE "
         first = True
         for req in reqs:

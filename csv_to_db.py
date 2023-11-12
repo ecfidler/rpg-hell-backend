@@ -48,7 +48,7 @@ def create_from_csv(csv_path):
                 print(f"Making Spell {row[0]}")
                 dice, level = get_cost(row[1])
                 tags = spliter(row[3])
-                obj = Spell(row[0], row[2], dice, level, tags)
+                obj = Spell(name=row[0], effect=row[2], dice=dice, level=level, tags=tags)
             elif typ == 1:
                 # Name,Requirements,Dice Cost,Effect
                 print(f"Making Trait {row[0]}")
@@ -58,24 +58,24 @@ def create_from_csv(csv_path):
                 if dice < 0:
                     dice = dice*-1
                     is_p = True
-                obj = Trait(row[0], row[3], req, dice, is_p)
+                obj = Trait(name=row[0], effect=row[3], req=req, dice=dice, is_passive=is_p)
             elif typ == 2:
                 # Name,Requirement,Effect,Defence,Traits
                 print(f"Making Armor {row[0]}")
                 req = spliter(row[1])
                 tags = spliter(row[4])
-                obj = Item(row[0], "", 0, 0, tags, req)
+                obj = Item(name=row[0], effect="", cost=0, craft=0, tags=tags, req=req)
             elif typ == 3:
                 # Name,Requirement,Tags,Effect
                 print(f"Making Weapon {row[0]}")
                 req = spliter(row[1])
                 tags = spliter(row[2])
-                obj = Item(row[0], row[3], 0, 0, tags, req)
+                obj = Item(name=row[0], effect=row[3], cost=0, craft=0, tags=tags, req=req)
             else:
                 # Name,Tags,Effect,Cost,Crafting
                 print(f"Making Item {row[0]}")
                 tags = spliter(row[1])
-                obj = Item(row[0], row[2], 0, 0, tags)
+                obj = Item(name=row[0], effect=row[2], cost=0, craft=0, tags=tags)
 
             # print(obj.return_data())
 
