@@ -74,6 +74,17 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     return user
 
 
+async def get_admin(current_user: Annotated[User, Depends(get_current_user)]):
+    if not current_user.is_admin:
+        # TODO: Deduplicate unauthorized exceptions
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return current_user
+
+
 @app.get("/users/me", tags=["Users"])
 async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
     return current_user
@@ -131,7 +142,7 @@ async def get_object_by_id(id: Annotated[int, Path(title="The ID of the object t
 
 
 @app.put("/item/", tags=["Items"])
-async def put_item(item: Item, token: Annotated[str, Depends(oauth2_scheme)]):
+async def put_item(item: Item, token: Annotated[str, Depends(get_admin)]):
     res = crud.create_item(item)
     if (res == -1):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,

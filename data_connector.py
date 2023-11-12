@@ -79,7 +79,7 @@ def create(obj):
 
 
 def add_requirements(obj, cursor):
-    if obj.req != None and obj.req != []:
+    if obj.req:
         query = "INSERT INTO requirements (object_id, type, value) VALUES "
         for rq in obj.req:
             if " " in rq:
@@ -87,13 +87,13 @@ def add_requirements(obj, cursor):
             else:
                 typ = rq
                 val = 1
-            query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
+            query += f'({obj.id}, "{typ.lower()}", {int(val)}),'
         query = query[:-1]+";"  # required to do magic for later
         try:
             cursor.execute(query)
         except:
             print(query)
-            Exception("Requirements query broke")
+            raise Exception("Requirements query broke")
 
     return obj
 
@@ -106,7 +106,7 @@ def create_obj(obj, cursor):  # item: Item
         add_requirements(obj, cursor)
     except:
         print(query)
-        Exception("Creation Obj Broke")
+        raise Exception("Creation Obj Broke")
     return obj
 
 
@@ -134,13 +134,13 @@ def create_item(obj: Item, cursor):  # item: Item
                 typ = tag
                 val = 0
 
-            query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
+            query += f'({obj.id}, "{typ.lower()}", {int(val)}),'
         query = query[:-1]+";"  # required to do magic for later
         try:
             cursor.execute(query, (obj.id, obj.cost, obj.craft))
         except:
             print(query)
-            Exception("Item query Broke")
+            raise Exception("Item query Broke")
         # print(query)
     return obj
 
@@ -160,7 +160,7 @@ def add_spell_tags(obj: Spell, cursor):  # item: Item
     if obj.tags != None:
         query = "INSERT INTO spell_tags (spell_id, name) VALUES "
         for tag in obj.tags:
-            query += f'({obj.id}, "{str(tag).lower()}"),'
+            query += f'({obj.id}, "{tag.lower()}"),'
         query = query[:-1]+";"  # required to do magic for later
         try:
             cursor.execute(query)
