@@ -19,7 +19,7 @@ def tag_type(tag):
         return (tag[1],)
     
 
-def cleanup_bits_bobs(objects,tags,typ):
+def cleanup_tags_req(objects,tags,typ):
     tag_lst = {}
     t = []
     _id = tags[0][0]  # get the first id
