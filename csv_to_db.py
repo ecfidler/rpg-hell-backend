@@ -1,4 +1,4 @@
-from translator import *
+from data_connector import *
 import csv
 
 
@@ -37,7 +37,7 @@ def create_from_csv(csv_path):
             typ = 2
         elif "Fists" in reader[1]:  # check for weapons
             typ = 3
-        elif "Craft" in reader[0]:  # check for items
+        elif "Crafting" in reader[0]:  # check for items
             typ = 4
 
         for row in list(reader)[1:]:  # skip the header
@@ -92,5 +92,5 @@ if __name__ == "__main__":
 
     # MAGIC ERROR
     # clean_csv("data/Items_all.csv")
-    # create_from_csv("data/Items_all.csv")
-    create_from_csv("data/Spells_all1105.csv")
+    create_from_csv("data/Items_all1105.csv")
+    #create_from_csv("data/Spells_all1105.csv")
