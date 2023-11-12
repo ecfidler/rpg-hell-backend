@@ -5,6 +5,8 @@ from fastapi.responses import JSONResponse
 
 from typing import Annotated
 
+from sqlalchemy import JSON
+
 import crud
 from models import Trait, Item, Spell
 
@@ -97,6 +99,16 @@ async def get_all_items():
     res = crud.get_all_items()
     return JSONResponse(content={"data": res[0], "ids": res[1]}, status_code=status.HTTP_200_OK)
 
+
+@app.patch("/item/{id}", tags=["Items"])
+async def update_item(id: int, item: Item):
+    return JSONResponse(content={"data": update_item(id, item)}, status_code=status.HTTP_200_OK)
+
+
+@app.delete("item/{id}", tags=["Item"])
+async def delete_item(id: int):
+    return JSONResponse(content={"data": delete_item(id)}, status_code=status.HTTP_200_OK)
+
 #######################################################################
 ######################## Trait CRUD methods ###########################
 #######################################################################
@@ -117,6 +129,16 @@ async def put_trait(trait: Trait):
 async def get_all_traits():
     res = crud.get_all_traits()
     return JSONResponse(content={"data": res[0], "ids": res[1]}, status_code=status.HTTP_200_OK)
+
+
+@app.patch("/trait/{id}", tags=["Traits"])
+async def update_trait(id: int, trait: Trait):
+    return JSONResponse(content={"data": crud.update_trait(id, trait)}, status_code=status.HTTP_200_OK)
+
+
+@app.delete("/trait/{id}", tags=["Trait"])
+async def delete_trait(id: int):
+    return JSONResponse(content={"data": crud.delete_trait(id)}, status_code=status.HTTP_200_OK)
 
 #######################################################################
 ######################### Spell CRUD methods ##########################
@@ -140,6 +162,16 @@ async def get_spell_by_id(id: Annotated[int, Path(title="The ID of the spell to 
     return JSONResponse(content={"data": crud.get_spell(int)}, status_code=status.HTTP_200_OK)
 
 
+@app.patch("/spell/{id}", tags=["Spells"])
+async def update_spell(id: int, spell: Spell):
+    return JSONResponse(content={"data": crud.update_spell(id, spell)}, status_code=status.HTTP_200_OK)
+
+
+@app.delete("/spell/{id}", tags=["Spells"])
+async def delete_spell(id: int):
+    return JSONResponse(content={"data": crud.delete_spell(id)}, status_code=status.HTTP_200_OK)
+
+
 @app.put("/spell/", tags=["Spells"])
 async def put_spell(spell: Spell):
     res = crud.create_spell(spell)
@@ -151,12 +183,6 @@ async def put_spell(spell: Spell):
 
 '''
 
-get all formal route
-update item
-update trait
-update spell
 robust "search" functionality for spells & objects
-delete object 
-delete spell
 
 '''
