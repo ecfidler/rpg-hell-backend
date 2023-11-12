@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class Object(BaseModel):
-    id: int = 0
+    # id: int = 0
     name: str
     effect: str = None
     req: list[str] = []
@@ -65,7 +65,7 @@ class Item(Object):
 
 
 class Spell(BaseModel):
-    id: int = 0
+    # id: int = 0
     name: str
     effect: str = None
     dice: int = 0

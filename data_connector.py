@@ -9,7 +9,7 @@ from models import Object, Item, Trait, Spell
 from data_con_modules.data_con_create import create_obj, create_item, create_trait, create_spell
 # from data_con_modules.data_con_update import update_item, update_spell, update_trait
 from data_con_modules.data_con_del import delete_core
-from data_con_modules.data_con_read import cleanup_tags, cleanup_tags_large, cleanup_search_items, cleanup_search_traits, cleanup_item_req_large, cleanup_req_large
+from data_con_modules.data_con_read import cleanup_tags, cleanup_search_items, cleanup_search_traits, cleanup_bits_bobs
 from data_con_modules.data_con_filter import cleanup_filter, get_filter_query
 
 # Database configuration
@@ -181,7 +181,7 @@ def get_traits(_ids:list[int]=[]):
     # remove the [] from ids
     query = f"SELECT object_id, type, value FROM requirements WHERE object_id IN ({str(ids)[1:-1]})"
     cursor.execute(query)
-    cleanup_req_large(traits, cursor.fetchall())
+    cleanup_bits_bobs(traits, cursor.fetchall(),"req")
 
     cursor.close()
     return traits, ids
@@ -205,14 +205,14 @@ def get_items(_ids:list[int]=[]):
     # remove the []
     query = f"SELECT item_id, name, value FROM item_tags WHERE item_id IN ({str(ids)[1:-1]})"
     cursor.execute(query)
-    cleanup_tags_large(items, cursor.fetchall())
+    cleanup_bits_bobs(items, cursor.fetchall(),'tags')
 
     # remove the []
     query = f"SELECT object_id, type, value FROM requirements WHERE object_id IN ({str(ids)[1:-1]})"
     cursor.execute(query)
     tmpitm = cursor.fetchall() # items may not have requirements
     if len(tmpitm):
-        cleanup_item_req_large(items, tmpitm)
+        cleanup_bits_bobs(items, tmpitm, 'req')
 
     cursor.close()
     return items, ids
@@ -236,7 +236,7 @@ def get_spells(_ids:list[int]=[]):
     # remove the []
     query = f"SELECT spell_id, name FROM spell_tags WHERE spell_id IN ({str(ids)[1:-1]})"
     cursor.execute(query)
-    cleanup_tags_large(spells, cursor.fetchall())
+    cleanup_bits_bobs(spells, cursor.fetchall(),'tags')
 
     cursor.close()
     return spells, ids
@@ -391,7 +391,7 @@ if __name__ == "__main__":
 
     # print(read_object(1))
 
-    # print(read_spell("pop rocks"))
+    # print(read_spell("poprocks"))
     # print(get_items())
     # print(get_traits())
     # print(get_spells())
