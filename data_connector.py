@@ -656,6 +656,29 @@ def filter_base(loc: str, reqs: list[str]=[],tags: list[str]=[]):
     return ids
 
 
+def filter_traits(reqs:list[str]):
+    ids = filter_base("traits",reqs)
+    data, ids = get_traits(ids)
+    return data, ids
+
+def filter_items_by_reqs(reqs:list[str]):
+    ids = filter_base("items",reqs)
+    data, ids = get_items(ids)
+    return data, ids
+
+def filter_items_by_tags(tags:list[str]):
+    ids = filter_base("items",[],tags)
+    data, ids = get_items(ids)
+    return data, ids
+
+def filter_spells(tags:list[str]):
+    ids = filter_base("spells",[],tags)
+    data, ids = get_spells(ids)
+    return data, ids
+
+
+
+
 if __name__ == "__main__":
     pass
     # obj = Item('oh boy','its party time',6,1,['aaaa 20','ooo 1'])
@@ -671,7 +694,14 @@ if __name__ == "__main__":
     # print(get_items())
     # print(get_traits())
     # print(get_spells())
+    
+    
     # print(filter_base("spells",[],["touch"])) # Fails if given both at the same time but works seprately
+    # print(filter_spells(["touch","utility"]))
+    # print(filter_traits(["soul 2","body 1"]))
+    # print(filter_items_by_reqs(["body 2"]))
+    print(filter_items_by_tags(["small",'potion']))
+
 
     # ids = [477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 624, 625, 626, 627, 628, 629]
 
