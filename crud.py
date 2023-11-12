@@ -30,8 +30,8 @@ def create_item(item: Item):
     return dl.create(item)
 
 
-def update_item(id: int, new_item: Item):
-    return dl.update_item(id, new_item)
+# def update_item(id: int, new_item: Item):
+#     return dl.update_item(id, new_item)
 
 
 def delete_item(id):
@@ -48,8 +48,8 @@ def get_all_traits():
     return dl.get_traits()
 
 
-def update_trait(id: int, new_trait: Trait):
-    return dl.update_trait(int, new_trait)
+# def update_trait(id: int, new_trait: Trait):
+#     return dl.update_trait(int, new_trait)
 
 
 def delete_trait(id: int):
@@ -75,8 +75,8 @@ def create_spell(spell: Spell):
     return dl.create(spell)
 
 
-def update_spell(id: int, new_spell: Spell):
-    return dl.update_spell(id, new_spell)
+# def update_spell(id: int, new_spell: Spell):
+#     return dl.update_spell(id, new_spell)
 
 
 def delete_spell(id):
