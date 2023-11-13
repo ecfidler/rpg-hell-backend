@@ -13,7 +13,7 @@ discord = DiscordOAuthClient(
     scopes=("identify", "guilds", "email")
 )
 
-router = APIRouter(tag=["Users"])
+router = APIRouter(tags=["Users"])
 
 
 async def admin(user: Annotated[User, Depends(discord.user)]):
