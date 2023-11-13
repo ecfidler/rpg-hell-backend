@@ -1,4 +1,7 @@
 fastapi
 uvicorn
 pydantic
+pydantic_settings
+python-dotenv
 mysqlclient
+fastapi-discord

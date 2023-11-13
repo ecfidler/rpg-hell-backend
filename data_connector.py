@@ -12,10 +12,13 @@ from data_con_modules.data_con_del import delete_core
 from data_con_modules.data_con_read import cleanup_tags, cleanup_search, cleanup_tags_req
 from data_con_modules.data_con_filter import cleanup_filter, get_filter_query
 
-# Database configuration
-with open('db_config.json') as json_file:
-    db_config = json.load(json_file)
+from settings import get_settings
 
+
+settings = get_settings()
+
+db_config = {"host": settings.database_host, "user": settings.database_user,
+             "passwd": settings.database_password, "db": settings.database_name}
 
 # Create a connection to the database
 conn = MySQLdb.connect(**db_config)
@@ -52,13 +55,13 @@ def do_query(query):
 #######################################################################
 
 
-def create(obj, _id:int = None):
+def create(obj, _id: int = None):
     cursor = conn.cursor()
     print("Start Creation")
 
     try:
         clss = obj.__class__
-        
+
         if clss == Object:
             print("Creating Obj")
             obj = create_obj(obj, cursor, _id)
@@ -92,19 +95,19 @@ def create(obj, _id:int = None):
 #######################################################################
 
 
-def update_trait(id:int, trait: Trait):
+def update_trait(id: int, trait: Trait):
     delete_trait(id)
-    return create(trait,id)
+    return create(trait, id)
 
 
-def update_item(id:int, item: Item):
+def update_item(id: int, item: Item):
     delete_item(id)
-    return create(item,id)
+    return create(item, id)
 
 
-def update_trait(id:int, spell: Spell):
+def update_trait(id: int, spell: Spell):
     delete_spell(id)
-    return create(spell,id)
+    return create(spell, id)
 
 #######################################################################
 ############################ Read Commands ############################
@@ -180,8 +183,7 @@ def read_spell(spell_quiry):
     return {"id": item[0], "name": item[1], "effect": item[2], "dice": item[3], "level": item[4], "tags": tags}
 
 
-
-def get_traits(_ids:list[int]=[]):
+def get_traits(_ids: list[int] = []):
     """
     Returns all traits
     """
@@ -197,13 +199,13 @@ def get_traits(_ids:list[int]=[]):
     # remove the [] from ids
     query = f"SELECT object_id, type, value FROM requirements WHERE object_id IN ({str(ids)[1:-1]})"
     cursor.execute(query)
-    cleanup_tags_req(traits, cursor.fetchall(),"req")
+    cleanup_tags_req(traits, cursor.fetchall(), "req")
 
     cursor.close()
     return traits, ids
 
 
-def get_items(_ids:list[int]=[]):
+def get_items(_ids: list[int] = []):
     """
     Returns all items
     """
@@ -213,20 +215,20 @@ def get_items(_ids:list[int]=[]):
         query = f"SELECT objects.id, objects.name, objects.effect, items.cost, items.craft FROM objects, items WHERE objects.id=items.id AND objects.id IN ({str(_ids)[1:-1]});"
     else:
         query = f"SELECT objects.id, objects.name, objects.effect, items.cost, items.craft FROM objects INNER JOIN items ON objects.id=items.id;"
-    
+
     # print(query)
     cursor.execute(query)
-    items, ids = cleanup_search(cursor.fetchall(),"items")
+    items, ids = cleanup_search(cursor.fetchall(), "items")
 
     # remove the []
     query = f"SELECT item_id, name, value FROM item_tags WHERE item_id IN ({str(ids)[1:-1]})"
     cursor.execute(query)
-    cleanup_tags_req(items, cursor.fetchall(),'tags')
+    cleanup_tags_req(items, cursor.fetchall(), 'tags')
 
     # remove the []
     query = f"SELECT object_id, type, value FROM requirements WHERE object_id IN ({str(ids)[1:-1]})"
     cursor.execute(query)
-    tmpitm = cursor.fetchall() # items may not have requirements
+    tmpitm = cursor.fetchall()  # items may not have requirements
     if len(tmpitm):
         cleanup_tags_req(items, tmpitm, 'req')
 
@@ -234,7 +236,7 @@ def get_items(_ids:list[int]=[]):
     return items, ids
 
 
-def get_spells(_ids:list[int]=[]):
+def get_spells(_ids: list[int] = []):
     """
     Returns all spells
     """
@@ -245,15 +247,14 @@ def get_spells(_ids:list[int]=[]):
     else:
         query = f"SELECT id, name, effect, dice, level FROM spells;"
 
-
     cursor.execute(query)
-    spells, ids = cleanup_search(cursor.fetchall(),"spells")
+    spells, ids = cleanup_search(cursor.fetchall(), "spells")
 
     # remove the []
     query = f"SELECT spell_id, name FROM spell_tags WHERE spell_id IN ({str(ids)[1:-1]})"
     cursor.execute(query)
     # print(cursor.fetchall())
-    cleanup_tags_req(spells, cursor.fetchall(),'tags')
+    cleanup_tags_req(spells, cursor.fetchall(), 'tags')
 
     cursor.close()
     return spells, ids
@@ -261,7 +262,6 @@ def get_spells(_ids:list[int]=[]):
 #######################################################################
 ########################### Delete Commands ###########################
 #######################################################################
-
 
 
 def delete_item(item):
@@ -338,17 +338,16 @@ def delete_spell(spell):
 #######################################################################
 
 
-
-def filter_base(loc: str, reqs: list[str]=[],tags: list[str]=[]):
-    # SELECT DISTINCT id, name FROM objects WHERE id IN 
-    # (SELECT object_id FROM requirements WHERE 
+def filter_base(loc: str, reqs: list[str] = [], tags: list[str] = []):
+    # SELECT DISTINCT id, name FROM objects WHERE id IN
+    # (SELECT object_id FROM requirements WHERE
     # object_id IN (SELECT object_id FROM requirements WHERE `type` IN ("Body") AND `value` IN (2))
     # AND object_id IN (SELECT object_id FROM requirements WHERE `type` IN ("mind") AND `value` IN (1))
     # )
 
     cursor = conn.cursor()
-    
-    query = get_filter_query(loc,reqs,tags)
+
+    query = get_filter_query(loc, reqs, tags)
 
     print(query)
     cursor.execute(query)
@@ -358,43 +357,44 @@ def filter_base(loc: str, reqs: list[str]=[],tags: list[str]=[]):
     return ids
 
 
-def filter_traits_by_reqs(reqs:list[str]):
-    ids = filter_base("traits",reqs)
+def filter_traits_by_reqs(reqs: list[str]):
+    ids = filter_base("traits", reqs)
     if len(ids):
         data, ids = get_traits(ids)
     else:
-        return [],[]
-    
+        return [], []
+
     return data, ids
 
-def filter_items_by_reqs(reqs:list[str]):
-    ids = filter_base("items",reqs)
+
+def filter_items_by_reqs(reqs: list[str]):
+    ids = filter_base("items", reqs)
     if len(ids):
         data, ids = get_items(ids)
     else:
-        return [],[]
-    
+        return [], []
+
     return data, ids
 
-def filter_items_by_tags(tags:list[str]):
-    ids = filter_base("items",[],tags)
+
+def filter_items_by_tags(tags: list[str]):
+    ids = filter_base("items", [], tags)
     if len(ids):
         data, ids = get_items(ids)
     else:
-        return [],[]
+        return [], []
 
     return data, ids
 
-def filter_spells_by_tags(tags:list[str]):
-    ids = filter_base("spells",[],tags)
+
+def filter_spells_by_tags(tags: list[str]):
+    ids = filter_base("spells", [], tags)
     if len(ids):
         data, ids = get_spells(ids)
     else:
-        return [],[]
+        return [], []
 
     return data, ids
-
-
 
 
 if __name__ == "__main__":
@@ -412,14 +412,12 @@ if __name__ == "__main__":
     # print(get_items())
     # print(get_traits())
     # print(get_spells([1]))
-    
-    
+
     # print(filter_base("spells",[],["touch"])) # Fails if given both at the same time but works seprately
     # print(filter_spells_by_tags(["touch","utility"]))
     # print(filter_traits_by_reqs(["soul 2","body 1"]))
     # print(filter_items_by_reqs(["body 2"]))
     # print(filter_items_by_tags(["tiny",'potion']))
-
 
     # ids = [477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 494, 495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 624, 625, 626, 627, 628, 629]
 

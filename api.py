@@ -1,14 +1,15 @@
-from fastapi import FastAPI, HTTPException, status, Response, Path, Query
+from fastapi import FastAPI, HTTPException, status, Response, Path, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
-
 from fastapi.responses import JSONResponse
+
+from fastapi_discord import Unauthorized
 
 from typing import Annotated
 
-from sqlalchemy import JSON
-
 import crud
 from models import Trait, Item, Spell
+
+import auth
 
 tags = [
     {
@@ -30,6 +31,10 @@ tags = [
     {
         "name": "Items",
         "description": ""
+    },
+    {
+        "name": "Users",
+        "description": ""
     }
 ]
 
@@ -46,10 +51,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 
 #######################################################################
 ################################  Temp  ###############################
 #######################################################################
+
 
 @app.get("/")
 async def root():
@@ -75,7 +82,8 @@ async def object_search(name: str):
 
 
 # api.example.com/object/5
-@app.get("/object/{id}", tags=["Objects"])
+#
+@app.get("/object/{id}", tags=["Objects"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])
 async def get_object_by_id(id: Annotated[int, Path(title="The ID of the object to get")]):
     return JSONResponse(content={"data": crud.get_object(id)}, status_code=status.HTTP_200_OK)
 
@@ -181,8 +189,7 @@ async def put_spell(spell: Spell):
     else:
         return JSONResponse(content={"id": res}, status_code=status.HTTP_200_OK)
 
-'''
 
-robust "search" functionality for spells & objects
-
-'''
+@app.exception_handler(Unauthorized)
+async def unauthorized_error_handler(_, __):
+    return JSONResponse({"error": "Unauthorized"}, status_code=401)
