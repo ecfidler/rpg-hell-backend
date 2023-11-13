@@ -25,10 +25,13 @@ def add_requirements(obj, cursor):
     return obj
 
 
-def create_obj(obj, cursor):  # item: Item
-    query = "INSERT INTO objects (name, effect) VALUES (%s, %s);"
+def create_obj(obj, cursor, _id: int = 0):  # item: Item
+    query = f"INSERT INTO objects (name, effect) VALUES ({obj.name}, {obj.effect});"
+    if _id:
+        query = f"INSERT INTO objects (id, name, effect) VALUES ({_id}, {obj.name}, {obj.effect});"
+    
     try:
-        cursor.execute(query, (obj.name, obj.effect))
+        cursor.execute(query)
         obj.id = cursor.lastrowid  # needed in order to have an id for the next step
         add_requirements(obj, cursor)
     except:
@@ -39,8 +42,8 @@ def create_obj(obj, cursor):  # item: Item
 
 # Route to create an item
 # @app.post("/items/", response_model=Item)
-def create_item(obj: Item, cursor):  # item: Item
-    create_obj(obj, cursor)
+def create_item(obj: Item, cursor, _id: int = 0):  # item: Item
+    create_obj(obj, cursor,_id)
     if obj.tags != None:
         query = "INSERT INTO items (id, cost, craft) VALUES (%s,%s,%s); INSERT INTO item_tags (item_id, name, value) VALUES "
         for tag in obj.tags:
@@ -72,8 +75,8 @@ def create_item(obj: Item, cursor):  # item: Item
     return obj
 
 
-def create_trait(obj: Trait, cursor):  # item: Item
-    create_obj(obj, cursor)
+def create_trait(obj: Trait, cursor, _id: int = 0):  # item: Item
+    create_obj(obj, cursor, _id)
     query = "INSERT INTO traits (id, dice, is_passive) VALUES (%s,%s,%s)"
     try:
         cursor.execute(query, (obj.id, obj.dice, obj.is_passive))
@@ -98,10 +101,13 @@ def add_spell_tags(obj: Spell, cursor):  # item: Item
     return obj
 
 
-def create_spell(obj, cursor):  # item: Item
-    query = "INSERT INTO spells (name, effect, dice, level) VALUES (%s, %s, %s, %s);"
+def create_spell(obj, cursor, _id: int = 0):  # item: Item
+    query = f"INSERT INTO spells (name, effect, dice, level) VALUES ({obj.name}, {obj.effect}, {obj.dice}, {obj.level});"
+    if _id:
+        query = f"INSERT INTO spells (id, name, effect, dice, level) VALUES ({_id},{obj.name}, {obj.effect}, {obj.dice}, {obj.level});"
+
     try:
-        cursor.execute(query, (obj.name, obj.effect, obj.dice, obj.level))
+        cursor.execute(query)
         obj.id = cursor.lastrowid  # needed in order to have an id for the next step
         add_spell_tags(obj, cursor)
     except:

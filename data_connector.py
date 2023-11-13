@@ -9,7 +9,7 @@ from models import Object, Item, Trait, Spell
 from data_con_modules.data_con_create import create_obj, create_item, create_trait, create_spell
 # from data_con_modules.data_con_update import update_item, update_spell, update_trait
 from data_con_modules.data_con_del import delete_core
-from data_con_modules.data_con_read import cleanup_tags, cleanup_tags_large, cleanup_search_items, cleanup_search_traits, cleanup_item_req_large, cleanup_req_large
+from data_con_modules.data_con_read import cleanup_tags, cleanup_search, cleanup_tags_req
 from data_con_modules.data_con_filter import cleanup_filter, get_filter_query
 
 # Database configuration
@@ -52,24 +52,26 @@ def do_query(query):
 #######################################################################
 
 
-def create(obj):
+def create(obj, _id:int = None):
     cursor = conn.cursor()
     print("Start Creation")
+
     try:
         clss = obj.__class__
+        
         if clss == Object:
             print("Creating Obj")
-            obj = create_obj(obj, cursor)
-        # match (switch) cases dont exist in this vs of python. Very sad
+            obj = create_obj(obj, cursor, _id)
+        # match (switch) cases dont work for objects aparently
         elif clss == Item:
             print("Creating Item")
-            obj = create_item(obj, cursor)
+            obj = create_item(obj, cursor, _id)
         elif clss == Trait:
             print("Creating Trait")
-            obj = create_trait(obj, cursor)
+            obj = create_trait(obj, cursor, _id)
         elif clss == Spell:
             print("Creating Spell")
-            obj = create_spell(obj, cursor)
+            obj = create_spell(obj, cursor, _id)
         else:
             raise TypeError("it broke, no give item")
 
@@ -89,6 +91,20 @@ def create(obj):
 ########################### Update Commands ###########################
 #######################################################################
 
+
+def update_trait(id:int, trait: Trait):
+    delete_trait(id)
+    return create(trait,id)
+
+
+def update_item(id:int, item: Item):
+    delete_item(id)
+    return create(item,id)
+
+
+def update_trait(id:int, spell: Spell):
+    delete_spell(id)
+    return create(spell,id)
 
 #######################################################################
 ############################ Read Commands ############################
@@ -176,12 +192,12 @@ def get_traits(_ids:list[int]=[]):
     else:
         query = f"SELECT objects.id, objects.name, objects.effect, traits.dice, traits.is_passive FROM objects INNER JOIN traits ON objects.id=traits.id;"
     cursor.execute(query)
-    traits, ids = cleanup_search_traits(cursor.fetchall())
+    traits, ids = cleanup_search(cursor.fetchall())
 
     # remove the [] from ids
     query = f"SELECT object_id, type, value FROM requirements WHERE object_id IN ({str(ids)[1:-1]})"
     cursor.execute(query)
-    cleanup_req_large(traits, cursor.fetchall())
+    cleanup_tags_req(traits, cursor.fetchall(),"req")
 
     cursor.close()
     return traits, ids
@@ -200,19 +216,19 @@ def get_items(_ids:list[int]=[]):
     
     # print(query)
     cursor.execute(query)
-    items, ids = cleanup_search_items(cursor.fetchall())
+    items, ids = cleanup_search(cursor.fetchall(),"items")
 
     # remove the []
     query = f"SELECT item_id, name, value FROM item_tags WHERE item_id IN ({str(ids)[1:-1]})"
     cursor.execute(query)
-    cleanup_tags_large(items, cursor.fetchall())
+    cleanup_tags_req(items, cursor.fetchall(),'tags')
 
     # remove the []
     query = f"SELECT object_id, type, value FROM requirements WHERE object_id IN ({str(ids)[1:-1]})"
     cursor.execute(query)
     tmpitm = cursor.fetchall() # items may not have requirements
     if len(tmpitm):
-        cleanup_item_req_large(items, tmpitm)
+        cleanup_tags_req(items, tmpitm, 'req')
 
     cursor.close()
     return items, ids
@@ -231,12 +247,13 @@ def get_spells(_ids:list[int]=[]):
 
 
     cursor.execute(query)
-    spells, ids = cleanup_search_items(cursor.fetchall())
+    spells, ids = cleanup_search(cursor.fetchall(),"spells")
 
     # remove the []
     query = f"SELECT spell_id, name FROM spell_tags WHERE spell_id IN ({str(ids)[1:-1]})"
     cursor.execute(query)
-    cleanup_tags_large(spells, cursor.fetchall())
+    # print(cursor.fetchall())
+    cleanup_tags_req(spells, cursor.fetchall(),'tags')
 
     cursor.close()
     return spells, ids
@@ -391,10 +408,10 @@ if __name__ == "__main__":
 
     # print(read_object(1))
 
-    # print(read_spell("pop rocks"))
+    # print(read_spell("poprocks"))
     # print(get_items())
     # print(get_traits())
-    # print(get_spells())
+    # print(get_spells([1]))
     
     
     # print(filter_base("spells",[],["touch"])) # Fails if given both at the same time but works seprately
