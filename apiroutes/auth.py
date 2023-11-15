@@ -14,28 +14,28 @@ discord = DiscordOAuthClient(
     scopes=("identify", "guilds", "email")
 )
 
-router = APIRouter(tags=["Users"])
+auth_router = APIRouter(tags=["Users"])
 
 
 async def admin(user: Annotated[User, Depends(discord.user)]):
     # TODO: ef - make this reference a database table
-    if (user.id == "173839815400357888") or (user.id == "275002179763306517"): # etan-josh
+    if (user.id == "173839815400357888") or (user.id == "275002179763306517"):  # etan-josh
         return True
     else:
         raise Unauthorized
 
 
-@router.on_event("startup")
+@auth_router.on_event("startup")
 async def on_startup():
     await discord.init()
 
 
-@router.get("/login")
+@auth_router.get("/login")
 async def login():
     return {"url": discord.oauth_login_url}
 
 
-@router.get("/auth/discord/callback")
+@auth_router.get("/auth/discord/callback")
 async def callback(code: str):
     token, refresh_token = await discord.get_access_token(code)
     response = JSONResponse(
@@ -48,7 +48,7 @@ async def callback(code: str):
     return response  # change to a redirect response when working on front-end?
 
 
-@router.get(
+@auth_router.get(
     "/authenticated",
     dependencies=[Depends(discord.requires_authorization)],
     response_model=bool,
@@ -61,6 +61,6 @@ async def isAuthenticated(token: str = Depends(discord.get_token)):
         return False
 
 
-@router.get("/user", dependencies=[Depends(discord.requires_authorization)], response_model=User)
+@auth_router.get("/user", dependencies=[Depends(discord.requires_authorization)], response_model=User)
 async def get_user(user: User = Depends(discord.user)):
     return user
