@@ -18,7 +18,7 @@ router = APIRouter(tags=["Users"])
 
 async def admin(user: Annotated[User, Depends(discord.user)]):
     # TODO: ef - make this reference a database table
-    if (user.id == "173839815400357888"):
+    if (user.id == "173839815400357888") or (user.id == "275002179763306517"): # etan-josh
         return True
     else:
         raise Unauthorized

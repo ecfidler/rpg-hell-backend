@@ -57,7 +57,6 @@ class Item(Object):
     #     self.tags = _tags
 
     #     self.req = _req
-
     def update_info(self, info):
         info["cost"] = self.cost
         info["craft"] = self.craft

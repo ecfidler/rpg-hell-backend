@@ -90,6 +90,23 @@ def create(obj, _id: int = None):
         return -1
 
 
+def create_user(obj):
+    cursor = conn.cursor()
+    query = f"INSERT INTO users (discord_id,`name`) VALUES ({obj.id},{name});"
+    
+    try:
+        cursor.execute(query)
+        obj.id = cursor.lastrowid  # needed in order to have an id for the next step
+        cursor.close()
+        conn.commit()
+    except:
+        cursor.close()
+        conn.rollback()
+        print(query)
+        raise Exception("Creation user Broke")
+    return obj
+
+
 #######################################################################
 ########################### Update Commands ###########################
 #######################################################################
@@ -259,6 +276,52 @@ def get_spells(_ids: list[int] = []):
     cursor.close()
     return spells, ids
 
+
+def read_user(user_id, discord_id: str = ""):
+    cursor = conn.cursor()
+    query = f"INSERT INTO users (discord_id,`name`) VALUES ({obj.id},{name});"
+
+    try:
+        err = "ID"
+        query = f"SELECT id, discord_id, name, is_admin FROM users WHERE id={int(object_id)}"
+    except:
+        err = "NAME"
+        query = f'SELECT id, discord_id, name, is_admin FROM users WHERE name="{str(object_id).lower()}"'
+
+    if discord_id != "":
+        query = f'SELECT id, discord_id, name, is_admin FROM users WHERE discord_id="{str(discord_id).lower()}"'
+
+    cursor.execute(query)
+    user = cursor.fetchone()
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="user not found")
+    
+    cursor.close()
+    return user
+
+
+def get_users(_ids: list[int] = []):
+    cursor = conn.cursor()
+
+    if len(_ids):
+        query = f"SELECT id, discord_id, name, is_admin FROM users WHERE id IN ({str(_ids)[1:-1]});"
+    else:
+        query = f"SELECT id, discord_id, name, is_admin FROM users;"
+    
+    try:
+        cursor.execute(query)
+        users, ids = cleanup_search(cursor.fetchall(), "spells")
+        cursor.close()
+        conn.commit()
+    except:
+        cursor.close()
+        conn.rollback()
+        print(query)
+        raise Exception("get users Broke")
+    return users, ids
+
+
 #######################################################################
 ########################### Delete Commands ###########################
 #######################################################################
@@ -331,6 +394,25 @@ def delete_spell(spell):
         conn.rollback()
 
     return {"id": item_id}
+
+
+def delete_user(user):
+    item_id = read_user(user)["id"]
+    cursor = conn.cursor()
+    try:
+        print("Del user")
+        delete_core(item_id, "users", cursor)
+
+        print(f"Deleated {user} from database")
+        conn.commit()
+        cursor.close()
+    except:
+        print("Del user error")
+        cursor.close()
+        conn.rollback()
+
+    return {"id": item_id}
+
 
 
 #######################################################################

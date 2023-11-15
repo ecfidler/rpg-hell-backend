@@ -5,7 +5,8 @@ def delete_core(id: int, loc: str, cursor):
                 "objects": "id",
                 "item_tags": "item_id",
                 "items": "id",
-                "requirements": "object_id"}
+                "requirements": "object_id",
+                "users": "id"}
 
     query = f"DELETE FROM {loc} WHERE {id_types[loc]}={id}"
     # print(query)
