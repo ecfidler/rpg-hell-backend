@@ -1,5 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
 from fastapi_discord import DiscordOAuthClient, Unauthorized, User
 
 from settings import get_settings
@@ -37,7 +38,14 @@ async def login():
 @router.get("/auth/discord/callback")
 async def callback(code: str):
     token, refresh_token = await discord.get_access_token(code)
-    return {"access_token": token, "refresh_token": refresh_token}
+    response = JSONResponse(
+        content={"access_token": token, "refresh_token": refresh_token})
+    response.set_cookie(key="access_token", value=token,
+                        httponly=True, secure=True)
+    response.set_cookie(key="refresh_token",
+                        value=refresh_token, httponly=True, secure=True)
+
+    return response  # change to a redirect response when working on front-end?
 
 
 @router.get(

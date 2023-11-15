@@ -2,3 +2,4 @@
 /__pycache__
 db_config.json
 .env
+/data_con_modules/__pycache__
