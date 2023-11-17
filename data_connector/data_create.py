@@ -47,7 +47,7 @@ def create(obj, _id: int = None):
 def create_user(obj):
     cursor = conn.cursor()
     query = f"INSERT INTO users (discord_id,`name`) VALUES ({obj.id},{obj.name});"
-    
+
     try:
         cursor.execute(query)
         obj.id = cursor.lastrowid  # needed in order to have an id for the next step
@@ -59,4 +59,3 @@ def create_user(obj):
         print(query)
         raise Exception("Creation user Broke")
     return obj
-

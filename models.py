@@ -48,7 +48,6 @@ class Item(Object):
     cost: int = 0
     craft: int = 0
     tags: list[str] = []
-
     # def __init__(self, _name: str, _effect: str, _cost: int, _craft: int, _tags, _req=[]):
     #     self.name = str(_name).lower()
     #     self.effect = str(_effect)
@@ -82,11 +81,7 @@ class Spell(BaseModel):
         return {"id": self.id, "name": self.name, "effect": self.effect, "dice": self.dice, "level": self.level, "tags": self.tags}
 
 
-# class User(BaseModel):
-#     username: str
-#     email: str
-#     is_admin: bool = False
-
-
-# class UserDBModel(User):
-#     hashed_password: str
+class DBUser(BaseModel):
+    discord_id: int
+    username: str
+    email: str

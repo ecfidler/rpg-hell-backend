@@ -18,7 +18,6 @@ def update_item(id: int, item: Item):
     return create(item, id)
 
 
-def update_trait(id: int, spell: Spell):
+def update_spell(id: int, spell: Spell):
     delete_spell(id)
     return create(spell, id)
-

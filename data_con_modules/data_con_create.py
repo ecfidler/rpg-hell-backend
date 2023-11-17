@@ -29,7 +29,7 @@ def create_obj(obj, cursor, _id: int = 0):  # item: Item
     query = f"INSERT INTO objects (name, effect) VALUES ({obj.name}, {obj.effect});"
     if _id:
         query = f"INSERT INTO objects (id, name, effect) VALUES ({_id}, {obj.name}, {obj.effect});"
-    
+
     try:
         cursor.execute(query)
         obj.id = cursor.lastrowid  # needed in order to have an id for the next step
@@ -43,7 +43,7 @@ def create_obj(obj, cursor, _id: int = 0):  # item: Item
 # Route to create an item
 # @app.post("/items/", response_model=Item)
 def create_item(obj: Item, cursor, _id: int = 0):  # item: Item
-    create_obj(obj, cursor,_id)
+    create_obj(obj, cursor, _id)
     if obj.tags != None:
         query = "INSERT INTO items (id, cost, craft) VALUES (%s,%s,%s); INSERT INTO item_tags (item_id, name, value) VALUES "
         for tag in obj.tags:
@@ -80,9 +80,10 @@ def create_trait(obj: Trait, cursor, _id: int = 0):  # item: Item
     query = "INSERT INTO traits (id, dice, is_passive) VALUES (%s,%s,%s)"
     try:
         cursor.execute(query, (obj.id, obj.dice, obj.is_passive))
-    except:
+    except Exception as e:
         print(query)
-        Exception("Trait query Broke")
+        print(e)
+        Exception()
     return obj
 
 
