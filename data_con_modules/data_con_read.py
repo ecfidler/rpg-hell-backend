@@ -1,4 +1,4 @@
-
+from fastapi import HTTPException
 
 def cleanup_tags(tags):
     t = []
@@ -59,4 +59,27 @@ def cleanup_search(items, types = "types"):
         data.append(info)
         ids.append(item[0])
     return data, ids
+
+
+
+def read_one(query, cursor, ignore_missing=False):
+    cursor.execute(query)
+    item = cursor.fetchone()
+
+    if item is None and not ignore_missing:
+        raise HTTPException(status_code=404, detail=f"Item not found with query: {query}")
+    
+    return item
+
+
+
+def read_list(query, cursor, ignore_missing=False):
+    cursor.execute(query)
+    dirty_list = cursor.fetchall()
+
+    if dirty_list is None and not ignore_missing:
+        raise HTTPException(status_code=404, detail=f"Item not found with query: {query}")
+    
+    clean_list = cleanup_tags(dirty_list)
+    return clean_list
 
