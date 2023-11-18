@@ -11,10 +11,8 @@ from fastapi import HTTPException
 def read_object(object_id):
     cursor = conn.cursor()
     try:
-        err = "ID"
         query = f"SELECT id, name, effect FROM objects WHERE id={int(object_id)}"
     except:
-        err = "NAME"
         query = f'SELECT id, name, effect FROM objects WHERE name="{str(object_id).lower()}"'
 
     item = read_one(query,cursor)
@@ -32,7 +30,7 @@ def read_object(object_id):
         info["is_passive"] = trait_data[1]
 
     # items
-    cursor.execute(f"SELECT cost, craft FROM items WHERE id={info['id']}")
+    query = f"SELECT cost, craft FROM items WHERE id={info['id']}"
     item_data = read_one(query,cursor, ignore_missing=True)
     if item_data != None:
         info["cost"] = item_data[0]
@@ -184,5 +182,3 @@ def get_users(_ids: list[int] = []):
         print(query)
         raise Exception("get users Broke")
     return users, ids
-
-

@@ -1,4 +1,4 @@
-from models import Object, Item, Trait, Spell
+from models import Object, Item, Trait, Spell, DBUser
 
 from data_con_modules.data_core import conn
 from data_con_modules.data_con_create import create_obj, create_item, create_spell, create_trait
@@ -44,9 +44,9 @@ def create(obj, _id: int = None):
         return -1
 
 
-def create_user(obj):
+def create_user(obj: DBUser):
     cursor = conn.cursor()
-    query = f"INSERT INTO users (discord_id,`name`) VALUES ({obj.id},{obj.name});"
+    query = f'INSERT INTO users (discord_id,`name`) VALUES ("{obj.discord_id}","{obj.username}");'
 
     try:
         cursor.execute(query)

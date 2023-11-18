@@ -26,9 +26,9 @@ def add_requirements(obj, cursor):
 
 
 def create_obj(obj, cursor, _id: int = 0):  # item: Item
-    query = f"INSERT INTO objects (name, effect) VALUES ({obj.name}, {obj.effect});"
+    query = f'INSERT INTO objects (name, effect) VALUES ("{obj.name}", "{obj.effect}");'
     if _id:
-        query = f"INSERT INTO objects (id, name, effect) VALUES ({_id}, {obj.name}, {obj.effect});"
+        query = f'INSERT INTO objects (id, name, effect) VALUES ({_id}, "{obj.name}", "{obj.effect}");'
 
     try:
         cursor.execute(query)
@@ -103,9 +103,9 @@ def add_spell_tags(obj: Spell, cursor):  # item: Item
 
 
 def create_spell(obj, cursor, _id: int = 0):  # item: Item
-    query = f"INSERT INTO spells (name, effect, dice, level) VALUES ({obj.name}, {obj.effect}, {obj.dice}, {obj.level});"
+    query = f'INSERT INTO spells (name, effect, dice, level) VALUES ("{obj.name}", "{obj.effect}", {int(obj.dice)}, {int(obj.level)});'
     if _id:
-        query = f"INSERT INTO spells (id, name, effect, dice, level) VALUES ({_id},{obj.name}, {obj.effect}, {obj.dice}, {obj.level});"
+        query = f'INSERT INTO spells (id, name, effect, dice, level) VALUES ({_id},"{obj.name}", "{obj.effect}", {int(obj.dice)}, {int(obj.level)});'
 
     try:
         cursor.execute(query)

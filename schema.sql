@@ -62,3 +62,6 @@ ALTER TABLE `traits` ADD FOREIGN KEY (`id`) REFERENCES `objects` (`id`);
 ALTER TABLE `spell_tags` ADD FOREIGN KEY (`spell_id`) REFERENCES `spells` (`id`);
 
 ALTER TABLE `item_tags` ADD FOREIGN KEY (`item_id`) REFERENCES `items` (`id`);
+
+
+INSERT INTO objects (id,name, effect) VALUES (0, "Kokk", "This is here so that we dont have to worry about id 0 when doing creation.");
