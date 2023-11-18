@@ -50,7 +50,8 @@ def create_user(obj: DBUser):
 
     try:
         cursor.execute(query)
-        obj.id = cursor.lastrowid  # needed in order to have an id for the next step
+        # needed in order to have an id for the next step
+        obj.discord_id = cursor.lastrowid
         cursor.close()
         conn.commit()
     except:

@@ -85,3 +85,5 @@ class DBUser(BaseModel):
     discord_id: int
     username: str
     email: str
+    is_admin: bool = False
+    avatar_url: str = ""

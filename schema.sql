@@ -47,11 +47,11 @@ CREATE TABLE `item_tags` (
 );
 
 CREATE TABLE `users` (
-	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`id` INTEGER PRIMARY KEY AUTO_INCREMENT,
 	`discord_id` TEXT NOT NULL COMMENT 'Given by discords info',
-	`name` TEXT NULL DEFAULT NULL COMMENT 'The Users discord tagname (bertle.) not nicknames' COLLATE 'utf8mb4_0900_ai_ci',
-	`is_admin` TINYINT(1) NOT NULL DEFAULT '0',
-)
+	`name` TEXT NULL DEFAULT NULL COMMENT 'The Users discord tagname (bertle.) not nicknames',
+	`is_admin` TINYINT(1) NOT NULL DEFAULT '0'
+);
 
 ALTER TABLE `requirements` ADD FOREIGN KEY (`object_id`) REFERENCES `objects` (`id`);
 

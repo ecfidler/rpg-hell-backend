@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from fastapi_discord import DiscordOAuthClient, Unauthorized, User
 
+from crud import get_create_user, get_user
+
 from models import DBUser
 
 from settings import get_settings
@@ -20,7 +22,7 @@ auth_router = APIRouter(tags=["Users"])
 
 
 async def admin(user: Annotated[User, Depends(discord.user)]):
-    # TODO: ef - make this reference a database table
+    is_user_admin = get_user(user.id).get("is_admin")
     if (user.id == "173839815400357888") or (user.id == "275002179763306517"):  # etan-josh
         return True
     else:
@@ -41,10 +43,13 @@ async def login():
 async def callback(code: str):
     token, refresh_token = await discord.get_access_token(code)
 
-    # user = await get_user()
+    # user = await get_user(discord.user())
+
+    # userData = DBUser(discord_id=user.id,
+    #                   username=user.username, email=user.email)
 
     response = JSONResponse(
-        content={"access_token": token, "refresh_token": refresh_token})
+        content={"access_token": token, "refresh_token": refresh_token, })  # "user": userData
     response.set_cookie(key="access_token", value=token,
                         httponly=True, secure=True)
     response.set_cookie(key="refresh_token",
@@ -79,5 +84,13 @@ async def isAuthenticated(token: str = Depends(discord.get_token)):
 
 
 @auth_router.get("/user", dependencies=[Depends(discord.requires_authorization)], response_model=User)
-async def get_user(user: User = Depends(discord.user)):
+async def get_discord_user(user: User = Depends(discord.user)):
     return user
+
+
+@auth_router.get("/me", dependencies=[Depends(discord.requires_authorization)])
+async def get_create_database_user(user: User = Depends(discord.user)):
+    res = get_create_user(
+        DBUser(discord_id=user.id, username=user.username, email=user.email))
+    # res.avatar_url = user.avatar_url
+    return res

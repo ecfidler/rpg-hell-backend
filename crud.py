@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from models import Trait, Item, Spell, DBUser
 # import data_connector as dl  # do_query, create, read_object, read_spell
 import data_connector.data_create as create
@@ -94,14 +95,23 @@ def delete_spell(id):
 
 
 def get_create_user(user: DBUser):
-    pass
+    try:
+        res = get_user(user.discord_id)
+    except:
+        res = create_user(user)
+
+    return res
 
 
 def get_user(discord_id: int):
-    pass
+    return read.read_user_from_discord_id(discord_id)
 
 
 def create_user(user: DBUser):
-    return create.create_user(DBUser)
+    return create.create_user(user)
+
+
+def update_user(user: DBUser):
+    pass  # return update.update_user(DBUser)
 
 # def get_create_user(id: int, email: str):

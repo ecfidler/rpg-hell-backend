@@ -15,7 +15,7 @@ def read_object(object_id):
     except:
         query = f'SELECT id, name, effect FROM objects WHERE name="{str(object_id).lower()}"'
 
-    item = read_one(query,cursor)
+    item = read_one(query, cursor)
 
     query = f"SELECT type, value FROM requirements WHERE object_id={item[0]}"
     req = read_list(query, cursor, ignore_missing=True)
@@ -24,20 +24,20 @@ def read_object(object_id):
 
     # traits
     query = f"SELECT dice, is_passive FROM traits WHERE id={info['id']}"
-    trait_data = read_one(query,cursor, ignore_missing=True)
+    trait_data = read_one(query, cursor, ignore_missing=True)
     if trait_data != None:
         info["dice"] = trait_data[0]
         info["is_passive"] = trait_data[1]
 
     # items
     query = f"SELECT cost, craft FROM items WHERE id={info['id']}"
-    item_data = read_one(query,cursor, ignore_missing=True)
+    item_data = read_one(query, cursor, ignore_missing=True)
     if item_data != None:
         info["cost"] = item_data[0]
         info["craft"] = item_data[1]
 
         query = f"SELECT name, value FROM item_tags WHERE item_id={info['id']}"
-        tags = read_list(query,cursor)
+        tags = read_list(query, cursor)
         info["tags"] = tags
 
     cursor.close()
@@ -51,10 +51,10 @@ def read_spell(spell_quiry):
     except:
         query = f'SELECT id, name, effect, dice, level FROM spells WHERE name="{str(spell_quiry).lower()}"'
 
-    spell = read_one(query,cursor)
+    spell = read_one(query, cursor)
 
     query = f"SELECT name FROM spell_tags WHERE spell_id={spell[0]}"
-    tags = read_list(query,cursor)
+    tags = read_list(query, cursor)
 
     cursor.close()
     return {"id": spell[0], "name": spell[1], "effect": spell[2], "dice": spell[3], "level": spell[4], "tags": tags}
@@ -66,10 +66,10 @@ def get_traits(_ids: list[int] = []):
     """
     cursor = conn.cursor()
     query = f"SELECT objects.id, objects.name, objects.effect, traits.dice, traits.is_passive FROM objects INNER JOIN traits ON objects.id=traits.id"
-    
+
     if len(_ids):
         query += f" AND objects.id IN ({str(_ids)[1:-1]});"
-    
+
     cursor.execute(query)
     traits, ids = cleanup_search(cursor.fetchall())
 
@@ -88,10 +88,10 @@ def get_items(_ids: list[int] = []):
     """
     cursor = conn.cursor()
     query = f"SELECT objects.id, objects.name, objects.effect, items.cost, items.craft FROM objects, items WHERE objects.id=items.id"
-        
+
     if len(_ids):
         query += f" AND objects.id IN ({str(_ids)[1:-1]})"
-    
+
     # print(query)
     cursor.execute(query)
     items, ids = cleanup_search(cursor.fetchall(), "items")
@@ -145,21 +145,21 @@ def read_user_from_name(user_name):
 
     if user is None:
         raise HTTPException(status_code=404, detail="user not found")
-    
+
     cursor.close()
     return user
 
 
 def read_user_from_discord_id(discord_id):
     cursor = conn.cursor()
-    query = f'SELECT discord_id, name, is_admin FROM users WHERE discord_id="{str(discord_id).lower()}"'
+    query = f'SELECT discord_id, name, is_admin FROM users WHERE discord_id="{str(discord_id)}"'
 
     cursor.execute(query)
     user = cursor.fetchone()
 
     if user is None:
         raise HTTPException(status_code=404, detail="user not found")
-    
+
     cursor.close()
     return user
 
@@ -170,7 +170,7 @@ def get_users(_ids: list[int] = []):
 
     if len(_ids):
         query += f" WHERE id IN ({str(_ids)[1:-1]});"
-    
+
     try:
         cursor.execute(query)
         users, ids = cleanup_search(cursor.fetchall(), "spells")
