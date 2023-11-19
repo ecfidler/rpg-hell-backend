@@ -1,10 +1,10 @@
-from fastapi import HTTPException, status, Response, APIRouter, Depends, Path
+from fastapi import HTTPException, status, Response, APIRouter, Depends, Path, Query
 from fastapi.responses import JSONResponse
 import apiroutes.auth as auth
 
 from typing import Annotated
 
-from crud import create_spell, get_all_spells as get_all, update_spell, delete_spell, spell_search as search, get_spell
+from crud import create_spell, get_all_spells as get_all, update_spell, delete_spell, spell_search as search, get_spell, filter_spell
 
 from models import Spell
 
@@ -46,3 +46,8 @@ async def put_spell(spell: Spell):
                             detail=f"it failed and we don't have proper error catching yet 😨")
     else:
         return JSONResponse(content={"id": res}, status_code=status.HTTP_200_OK)
+
+
+@spells_router.get("/filterspells/")
+async def filter_spells_by_tags(tags: Annotated[str, Query(description="csv")]):
+    return JSONResponse(content={"data": filter_spell(tags)}, status_code=status.HTTP_200_OK)

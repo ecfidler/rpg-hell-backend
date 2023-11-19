@@ -89,7 +89,7 @@ async def get_discord_user(user: User = Depends(discord.user)):
 
 
 @auth_router.get("/me", dependencies=[Depends(discord.requires_authorization)])
-async def get_create_database_user(user: User = Depends(discord.user)):
+async def get_or_create_database_user(user: User = Depends(discord.user)):
     res = get_create_user(
         DBUser(discord_id=user.id, username=user.username, email=user.email))
     # res.avatar_url = user.avatar_url

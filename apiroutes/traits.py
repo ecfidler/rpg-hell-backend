@@ -1,8 +1,10 @@
-from fastapi import HTTPException, status, Response, APIRouter, Depends
+from fastapi import HTTPException, status, Response, APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 import apiroutes.auth as auth
 
-from crud import create_trait, get_all_traits as get_all, update_trait, delete_trait
+from typing import Annotated
+
+from crud import create_trait, get_all_traits as get_all, update_trait, delete_trait, filter_trait
 
 from models import Trait
 
@@ -34,3 +36,8 @@ async def update_trait(id: int, trait: Trait):
 @traits_router.delete("/trait/{id}", tags=["Traits"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])
 async def delete_trait(id: int):
     return JSONResponse(content={"data": delete_trait(id)}, status_code=status.HTTP_200_OK)
+
+
+@traits_router.get("/filtertraits/")
+async def filter_traits_by_requirements(requirements: Annotated[str, Query(description="csv")]):
+    return JSONResponse(content={"data": filter_trait(requirements)}, status_code=status.HTTP_200_OK)

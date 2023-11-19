@@ -1,3 +1,4 @@
+from logging import Filter
 from fastapi import HTTPException
 from models import Trait, Item, Spell, DBUser
 # import data_connector as dl  # do_query, create, read_object, read_spell
@@ -5,7 +6,10 @@ import data_connector.data_create as create
 import data_connector.data_read as read
 import data_connector.data_update as update
 import data_connector.data_delete as delete
+import data_connector.data_filter as filter
 # import data_connector.data_filter as filter
+
+from enumeration import FilterOption
 
 
 from data_con_modules.data_core import do_query
@@ -46,6 +50,18 @@ def update_item(id: int, new_item: Item):
 def delete_item(id):
     return delete.delete_item(id)
 
+
+def filter_item(filters: str, option: FilterOption):
+    _filters = filters.split(',')
+    if (option == FilterOption.requirements):
+        data, ids = filter.filter_items_by_reqs(_filters)
+    elif (option == FilterOption.tags):
+        data, ids = filter.filter_items_by_tags(_filters)
+    else:
+        raise ValueError(
+            "Query 'filter' is of Enum type FilterOption which has tags = 1 & requirements = 2")
+    return dict(zip(ids, data))
+
 # Traits
 
 
@@ -63,6 +79,12 @@ def update_trait(id: int, new_trait: Trait):
 
 def delete_trait(id: int):
     return delete.delete_trait(id)
+
+
+def filter_trait(requirements: str):
+    _requirements = requirements.split(',')
+    data, ids = filter.filter_traits_by_reqs(_requirements)
+    return dict(zip(ids, data))
 
 # Spells
 
@@ -91,12 +113,22 @@ def update_spell(id: int, new_spell: Spell):
 def delete_spell(id):
     return delete.delete_spell(id)
 
+
+def filter_spell(tags: str):
+    _tags = tags.split(',')
+    data, ids = filter.filter_spells_by_tags(_tags)
+    return dict(zip(ids, data))
+
 # Users
 
 
 def get_create_user(user: DBUser):
     try:
         res = get_user(user.discord_id)
+
+        # if the values in res = the values in user
+        # then call the update_user with the new values
+
     except:
         res = create_user(user)
 
@@ -113,5 +145,3 @@ def create_user(user: DBUser):
 
 def update_user(user: DBUser):
     pass  # return update.update_user(DBUser)
-
-# def get_create_user(id: int, email: str):
