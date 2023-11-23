@@ -48,9 +48,10 @@ CREATE TABLE `item_tags` (
 
 CREATE TABLE `users` (
 	`id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-	`discord_id` TEXT NOT NULL COMMENT 'Given by discords info',
-	`name` TEXT NULL DEFAULT NULL COMMENT 'The Users discord tagname (bertle.) not nicknames',
-	`is_admin` TINYINT(1) NOT NULL DEFAULT '0'
+	`discord_id` TEXT NOT NULL,
+	`name` TEXT NULL DEFAULT NULL,
+	`is_admin` TINYINT(1) NOT NULL DEFAULT '0',
+	`email` TEXT NULL DEFAULT NULL
 );
 
 ALTER TABLE `requirements` ADD FOREIGN KEY (`object_id`) REFERENCES `objects` (`id`);
@@ -64,5 +65,4 @@ ALTER TABLE `spell_tags` ADD FOREIGN KEY (`spell_id`) REFERENCES `spells` (`id`)
 ALTER TABLE `item_tags` ADD FOREIGN KEY (`item_id`) REFERENCES `items` (`id`);
 
 
-INSERT INTO objects (id,name, effect) VALUES (0, "Kokk", "This is here so that we dont have to worry about id 0 when doing creation.");
-INSERT INTO objects (id,name, effect) VALUES (1, "h", "there should be an h in your database :)");
+INSERT INTO objects (id,name, effect) VALUES (0, "Kokk", "This is here so that we dont have to worry about id 0 when doing creation.");prod080rpghelltest1prod080

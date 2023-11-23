@@ -1,7 +1,6 @@
 from logging import Filter
 from fastapi import HTTPException, status, Response, APIRouter, Depends, Path, Query
 from fastapi.responses import JSONResponse
-from sqlalchemy import JSON
 import apiroutes.auth as auth
 
 from typing import Annotated
