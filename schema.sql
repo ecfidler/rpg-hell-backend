@@ -65,3 +65,4 @@ ALTER TABLE `item_tags` ADD FOREIGN KEY (`item_id`) REFERENCES `items` (`id`);
 
 
 INSERT INTO objects (id,name, effect) VALUES (0, "Kokk", "This is here so that we dont have to worry about id 0 when doing creation.");
+INSERT INTO objects (id,name, effect) VALUES (1, "h", "there should be an h in your database :)");

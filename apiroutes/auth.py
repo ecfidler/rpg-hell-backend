@@ -43,11 +43,6 @@ async def login():
 async def callback(code: str):
     token, refresh_token = await discord.get_access_token(code)
 
-    # user = await get_user(discord.user())
-
-    # userData = DBUser(discord_id=user.id,
-    #                   username=user.username, email=user.email)
-
     response = JSONResponse(
         content={"access_token": token, "refresh_token": refresh_token, })  # "user": userData
     response.set_cookie(key="access_token", value=token,
