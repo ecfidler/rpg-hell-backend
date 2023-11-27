@@ -96,7 +96,7 @@ class DBUser(BaseModel):
         # You shouldent be able to change your discord id
         # if self.discord_id != other_user["discord_id"]:
         #     return False
-        if self.username != other_user["name"]:
+        if self.username != other_user["username"]:
             return False
         if self.email != other_user["email"]:
             return False

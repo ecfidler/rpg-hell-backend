@@ -71,7 +71,7 @@ def read_user_from_name(user_name):
         raise HTTPException(status_code=404, detail="user not found")
 
     cursor.close()
-    return {"discord_id": user[0], "name": user[1], "is_admin": user[2], "email": user[3]}
+    return {"discord_id": user[0], "username": user[1], "is_admin": user[2], "email": user[3]}
 
 
 def read_user_from_discord_id(discord_id):
@@ -85,7 +85,7 @@ def read_user_from_discord_id(discord_id):
         raise HTTPException(status_code=404, detail="user not found")
 
     cursor.close()
-    return {"id":user[0], "discord_id": user[1], "name": user[2], "is_admin": user[3], "email": user[4]}
+    return {"id":user[0], "discord_id": user[1], "username": user[2], "is_admin": user[3], "email": user[4]}
 
 
 def get_traits(_ids: list[int] = []):
