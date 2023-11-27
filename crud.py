@@ -1,6 +1,6 @@
 from logging import Filter
 from fastapi import HTTPException
-from models import Trait, Item, Spell, DBUser
+from models import Creature, Trait, Item, Spell, DBUser
 # import data_connector as dl  # do_query, create, read_object, read_spell
 import data_connector.data_create as create
 import data_connector.data_read as read
@@ -146,3 +146,9 @@ def create_user(user: DBUser):
 
 def update_user(user: DBUser):
     return update.update_user(user.id,user)
+
+
+# creatures
+
+def create_creature(creature: Creature):
+    return create.create(creature)

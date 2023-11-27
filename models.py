@@ -102,3 +102,37 @@ class DBUser(BaseModel):
             return False
         
         return True
+
+class Creature(BaseModel):
+    id: int = 0
+    name: str
+    types: list[str] = []
+    level: int = 0
+    body: int = 0
+    mind: int = 0
+    soul: int = 0
+    arcana: int = 0
+    crafting: int = 0
+    charm: int = 0
+    thieving: int = 0
+    nature: int = 0
+    medicine: int = 0
+    traits: list[str] = []
+    spells: list[str] = []
+    items: list[str] = []
+    notes: str = ""
+
+    def output_json(self):
+        return {"name": self.name}
+    
+    def create_textlist_from_Obj(lst):
+        txt = ""
+        for line in lst:
+            txt += f", {line.name}"
+        return txt[2:] # lop off the first "", ""
+
+    def create_textlist_from_strlist(lst):
+        print(lst)
+        print(', '.join(lst))
+        return ', '.join(lst)
+

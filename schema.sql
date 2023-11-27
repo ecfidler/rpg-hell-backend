@@ -54,6 +54,38 @@ CREATE TABLE `users` (
 	`email` TEXT NULL DEFAULT NULL
 );
 
+CREATE TABLE `creatures` (
+	`id` INTEGER PRIMARY KEY AUTO_INCREMENT,
+	`name` TEXT NOT NULL,
+    `level` integer DEFAULT 0,
+    `body` integer DEFAULT 0,
+    `mind` integer DEFAULT 0,
+    `soul` integer DEFAULT 0,
+    `arcana` integer DEFAULT 0,
+    `crafting` integer DEFAULT 0,
+    `charm` integer DEFAULT 0,
+    `thieving` integer DEFAULT 0,
+    `nature` integer DEFAULT 0,
+    `medicine` integer DEFAULT 0,
+	`traits` TEXT NULL DEFAULT NULL,
+    `spells` TEXT NULL DEFAULT NULL,
+    `items` TEXT NULL DEFAULT NULL,
+    `notes` TEXT NULL DEFAULT NULL
+);
+
+CREATE TABLE `creature_types` (
+  `type_id` INTEGER PRIMARY KEY AUTO_INCREMENT,
+  `creature_id` integer COMMENT 'Foreign Key',
+  `name` text COMMENT 'player, humanoid, animal, undead, construct, monstrosity, planar, mythic'
+);
+
+CREATE TABLE `creature_tags` (
+  `tag_id` INTEGER PRIMARY KEY AUTO_INCREMENT,
+  `creature_id` integer COMMENT 'Foreign Key',
+  `name` text,
+  `value` integer DEFAULT 0
+);
+
 ALTER TABLE `requirements` ADD FOREIGN KEY (`object_id`) REFERENCES `objects` (`id`);
 
 ALTER TABLE `items` ADD FOREIGN KEY (`id`) REFERENCES `objects` (`id`);
@@ -64,5 +96,8 @@ ALTER TABLE `spell_tags` ADD FOREIGN KEY (`spell_id`) REFERENCES `spells` (`id`)
 
 ALTER TABLE `item_tags` ADD FOREIGN KEY (`item_id`) REFERENCES `items` (`id`);
 
+ALTER TABLE `creature_types` ADD FOREIGN KEY (`creature_id`) REFERENCES `creatures` (`id`);
+ALTER TABLE `creature_tags` ADD FOREIGN KEY (`creature_id`) REFERENCES `creatures` (`id`);
 
-INSERT INTO objects (id,name, effect) VALUES (0, "Kokk", "This is here so that we dont have to worry about id 0 when doing creation.");
+
+INSERT INTO objects (id,name, effect) VALUES (1, "Kokk", "This is here so that we can do testing.");

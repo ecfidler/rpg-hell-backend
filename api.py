@@ -14,6 +14,7 @@ from apiroutes.traits import traits_router
 from apiroutes.items import items_router
 from apiroutes.spells import spells_router
 from apiroutes.objects import objects_router
+from apiroutes.creatures import creatures_router
 
 tags = [
     {
@@ -39,6 +40,10 @@ tags = [
     {
         "name": "Users",
         "description": ""
+    },
+    {
+        "name": "Creatures",
+        "description": ""
     }
 ]
 
@@ -60,6 +65,7 @@ app.include_router(traits_router)
 app.include_router(items_router)
 app.include_router(spells_router)
 app.include_router(objects_router)
+app.include_router(creatures_router)
 
 
 @app.get("/")

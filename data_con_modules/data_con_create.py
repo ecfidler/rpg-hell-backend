@@ -1,4 +1,5 @@
-from models import Item, Trait, Spell
+
+from models import Creature, Item, Trait, Spell
 
 #######################################################################
 ########################## Creation Commands ##########################
@@ -25,7 +26,7 @@ def add_requirements(obj, cursor):
     return obj
 
 
-def create_obj(obj, cursor, _id: int = 0):  # item: Item
+def create_obj(obj, cursor, _id: int = 0): 
     query = f'INSERT INTO objects (name, effect) VALUES ("{obj.name}", "{obj.effect}");'
     if _id:
         query = f'INSERT INTO objects (id, name, effect) VALUES ({_id}, "{obj.name}", "{obj.effect}");'
@@ -42,7 +43,7 @@ def create_obj(obj, cursor, _id: int = 0):  # item: Item
 
 # Route to create an item
 # @app.post("/items/", response_model=Item)
-def create_item(obj: Item, cursor, _id: int = 0):  # item: Item
+def create_item(obj: Item, cursor, _id: int = 0): 
     create_obj(obj, cursor, _id)
     if obj.tags != None:
         query = "INSERT INTO items (id, cost, craft) VALUES (%s,%s,%s); INSERT INTO item_tags (item_id, name, value) VALUES "
@@ -75,7 +76,7 @@ def create_item(obj: Item, cursor, _id: int = 0):  # item: Item
     return obj
 
 
-def create_trait(obj: Trait, cursor, _id: int = 0):  # item: Item
+def create_trait(obj: Trait, cursor, _id: int = 0): 
     create_obj(obj, cursor, _id)
     query = "INSERT INTO traits (id, dice, is_passive) VALUES (%s,%s,%s)"
     try:
@@ -87,7 +88,7 @@ def create_trait(obj: Trait, cursor, _id: int = 0):  # item: Item
     return obj
 
 
-def add_spell_tags(obj: Spell, cursor):  # item: Item
+def add_spell_tags(obj: Spell, cursor): 
     if obj.tags != None:
         query = "INSERT INTO spell_tags (spell_id, name) VALUES "
         for tag in obj.tags:
@@ -102,7 +103,7 @@ def add_spell_tags(obj: Spell, cursor):  # item: Item
     return obj
 
 
-def create_spell(obj, cursor, _id: int = 0):  # item: Item
+def create_spell(obj: Spell, cursor, _id: int = 0):
     query = f'INSERT INTO spells (name, effect, dice, level) VALUES ("{obj.name}", "{obj.effect}", {int(obj.dice)}, {int(obj.level)});'
     if _id:
         query = f'INSERT INTO spells (id, name, effect, dice, level) VALUES ({_id},"{obj.name}", "{obj.effect}", {int(obj.dice)}, {int(obj.level)});'
@@ -114,4 +115,53 @@ def create_spell(obj, cursor, _id: int = 0):  # item: Item
     except:
         print(query)
         Exception("Spell query Broke")
+    return obj
+
+
+def add_creature_types(obj: Creature, cursor): 
+    if obj.types != None:
+        query = "INSERT INTO creature_types (creature_id, name) VALUES "
+        for trait in obj.traits:
+            query += f'({obj.id}, "{str(trait).lower()}"),'
+        query = query[:-1]+";"  # required to do magic for later
+        try:
+            cursor.execute(query)
+        except:
+            print(query)
+            raise Exception("Creature types query Broke")
+
+    return obj
+
+def create_textlist_from_strlist(lst):
+    return ', '.join(lst)
+
+def create_creature(obj:Creature, cursor, _id: int = 0):
+    query = f'''INSERT INTO creatures (name, level, body, mind, soul, arcana, charm, crafting, thieving, nature, medicine, traits, spells, items, notes) VALUES (
+        "{str(obj.name)}",{int(obj.level)},
+        {int(obj.body)},{int(obj.mind)},{int(obj.soul)},
+        {int(obj.arcana)},{int(obj.charm)},{int(obj.crafting)},{int(obj.thieving)},{int(obj.nature)},{int(obj.medicine)},
+        "{create_textlist_from_strlist(obj.traits)}",
+        "{create_textlist_from_strlist(obj.spells)}",
+        "{create_textlist_from_strlist(obj.items)}",
+        "{str(obj.notes)}");'''
+
+    if _id:
+        query = f'''INSERT INTO creatures (id, name, level, body, mind, soul, arcana, charm, crafting, thieving, nature, medicine, traits, spells, items, notes) VALUES (
+        {_id},
+        {str(obj.name)},{int(obj.level)},
+        {int(obj.body)},{int(obj.mind)},{int(obj.soul)},
+        {int(obj.arcana)},{int(obj.charm)},{int(obj.crafting)},{int(obj.thieving)},{int(obj.nature)},{int(obj.medicine)},
+        "{obj.create_textlist_from_strlist(obj.traits)}",
+        "{obj.create_textlist_from_strlist(obj.spells)}",
+        "{obj.create_textlist_from_strlist(obj.items)}",
+        "{str(obj.notes)})";'''
+    try:
+        cursor.execute(query)
+        obj.id = cursor.lastrowid  # needed in order to have an id for the next step
+        print(obj.id)
+        # add_creature_tags(obj, cursor)
+        add_creature_types(obj, cursor)
+    except:
+        print(query)
+        raise Exception("Creature query Broke")
     return obj

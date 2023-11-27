@@ -1,7 +1,7 @@
-from models import Object, Item, Trait, Spell, DBUser
+from models import Object, Item, Trait, Spell, DBUser, Creature
 
 from data_con_modules.data_core import conn
-from data_con_modules.data_con_create import create_obj, create_item, create_spell, create_trait
+from data_con_modules.data_con_create import create_obj, create_item, create_spell, create_trait, create_creature
 
 
 #######################################################################
@@ -29,6 +29,9 @@ def create(obj, _id: int = None):
         elif clss == Spell:
             print("Creating Spell")
             obj = create_spell(obj, cursor, _id)
+        elif clss == Creature:
+            print("Creating Creature")
+            obj = create_creature(obj, cursor, _id)
         else:
             raise TypeError("it broke, no give item")
 

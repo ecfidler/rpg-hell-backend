@@ -182,3 +182,40 @@ def get_users(_ids: list[int] = []):
         print(query)
         raise Exception("get users Broke")
     return users, ids
+
+
+
+# def read_creature(object_id):
+#     cursor = conn.cursor()
+#     try:
+#         query = f"SELECT id, name, effect FROM objects WHERE id={int(object_id)}"
+#     except:
+#         query = f'SELECT id, name, effect FROM objects WHERE name="{str(object_id).lower()}"'
+
+#     item = read_one(query, cursor)
+
+#     query = f"SELECT type, value FROM requirements WHERE object_id={item[0]}"
+#     req = read_list(query, cursor, ignore_missing=True)
+
+#     info = {"id": item[0], "name": item[1], "effect": item[2], "req": req}
+
+#     # traits
+#     query = f"SELECT dice, is_passive FROM traits WHERE id={info['id']}"
+#     trait_data = read_one(query, cursor, ignore_missing=True)
+#     if trait_data != None:
+#         info["dice"] = trait_data[0]
+#         info["is_passive"] = trait_data[1]
+
+#     # items
+#     query = f"SELECT cost, craft FROM items WHERE id={info['id']}"
+#     item_data = read_one(query, cursor, ignore_missing=True)
+#     if item_data != None:
+#         info["cost"] = item_data[0]
+#         info["craft"] = item_data[1]
+
+#         query = f"SELECT name, value FROM item_tags WHERE item_id={info['id']}"
+#         tags = read_list(query, cursor)
+#         info["tags"] = tags
+
+#     cursor.close()
+#     return info
