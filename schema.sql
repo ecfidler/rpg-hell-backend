@@ -65,4 +65,4 @@ ALTER TABLE `spell_tags` ADD FOREIGN KEY (`spell_id`) REFERENCES `spells` (`id`)
 ALTER TABLE `item_tags` ADD FOREIGN KEY (`item_id`) REFERENCES `items` (`id`);
 
 
-INSERT INTO objects (id,name, effect) VALUES (0, "Kokk", "This is here so that we dont have to worry about id 0 when doing creation.");prod080rpghelltest1prod080
+INSERT INTO objects (id,name, effect) VALUES (0, "Kokk", "This is here so that we dont have to worry about id 0 when doing creation.");

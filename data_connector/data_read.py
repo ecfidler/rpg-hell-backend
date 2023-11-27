@@ -60,6 +60,34 @@ def read_spell(spell_quiry):
     return {"id": spell[0], "name": spell[1], "effect": spell[2], "dice": spell[3], "level": spell[4], "tags": tags}
 
 
+def read_user_from_name(user_name):
+    cursor = conn.cursor()
+    query = f'SELECT discord_id, name, is_admin, email FROM users WHERE name="{str(user_name).lower()}"'
+
+    cursor.execute(query)
+    user = cursor.fetchone()
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="user not found")
+
+    cursor.close()
+    return {"discord_id": user[0], "name": user[1], "is_admin": user[2], "email": user[3]}
+
+
+def read_user_from_discord_id(discord_id):
+    cursor = conn.cursor()
+    query = f'SELECT id, discord_id, name, is_admin, email FROM users WHERE discord_id="{str(discord_id)}"'
+
+    cursor.execute(query)
+    user = cursor.fetchone()
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="user not found")
+
+    cursor.close()
+    return {"id":user[0], "discord_id": user[1], "name": user[2], "is_admin": user[3], "email": user[4]}
+
+
 def get_traits(_ids: list[int] = []):
     """
     Returns all traits
@@ -136,44 +164,16 @@ def get_spells(_ids: list[int] = []):
     return spells, ids
 
 
-def read_user_from_name(user_name):
-    cursor = conn.cursor()
-    query = f'SELECT discord_id, name, is_admin FROM users WHERE name="{str(user_name).lower()}"'
-
-    cursor.execute(query)
-    user = cursor.fetchone()
-
-    if user is None:
-        raise HTTPException(status_code=404, detail="user not found")
-
-    cursor.close()
-    return user
-
-
-def read_user_from_discord_id(discord_id):
-    cursor = conn.cursor()
-    query = f'SELECT discord_id, name, is_admin FROM users WHERE discord_id="{str(discord_id)}"'
-
-    cursor.execute(query)
-    user = cursor.fetchone()
-
-    if user is None:
-        raise HTTPException(status_code=404, detail="user not found")
-
-    cursor.close()
-    return user
-
-
 def get_users(_ids: list[int] = []):
     cursor = conn.cursor()
-    query = f"SELECT id, discord_id, name, is_admin FROM users"
+    query = f"SELECT id, discord_id, name, is_admin, email FROM users"
 
     if len(_ids):
         query += f" WHERE id IN ({str(_ids)[1:-1]});"
 
     try:
         cursor.execute(query)
-        users, ids = cleanup_search(cursor.fetchall(), "spells")
+        users, ids = cleanup_search(cursor.fetchall(), "user")
         cursor.close()
         conn.commit()
     except:

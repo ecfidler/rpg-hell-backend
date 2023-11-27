@@ -44,14 +44,17 @@ def create(obj, _id: int = None):
         return -1
 
 
-def create_user(obj: DBUser):
+def create_user(obj: DBUser, _id: int = None):
+    query = f'INSERT INTO users (discord_id,`name`,email) VALUES ("{obj.discord_id}","{obj.username}","{obj.email}");'
+    if _id:
+        query = f'INSERT INTO users (id,discord_id,`name`,email) VALUES ({_id},"{obj.discord_id}","{obj.username}","{obj.email}");'
+
     cursor = conn.cursor()
-    query = f'INSERT INTO users (discord_id,`name`) VALUES ("{obj.discord_id}","{obj.username}");'
 
     try:
         cursor.execute(query)
         # needed in order to have an id for the next step
-        obj.discord_id = cursor.lastrowid
+        obj.id = cursor.lastrowid
         cursor.close()
         conn.commit()
     except:

@@ -125,9 +125,10 @@ def filter_spell(tags: str):
 def get_create_user(user: DBUser):
     try:
         res = get_user(user.discord_id)
-
-        # if the values in res = the values in user
-        # then call the update_user with the new values
+        
+        if not user.compare(res):
+            user.id = res["id"]
+            res = update_user(user)
 
     except:
         res = create_user(user)
@@ -144,4 +145,4 @@ def create_user(user: DBUser):
 
 
 def update_user(user: DBUser):
-    pass  # return update.update_user(DBUser)
+    return update.update_user(user.id,user)

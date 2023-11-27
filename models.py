@@ -82,8 +82,23 @@ class Spell(BaseModel):
 
 
 class DBUser(BaseModel):
+    id: int = 0
     discord_id: int
     username: str
     email: str
     is_admin: bool = False
     avatar_url: str = ""
+
+    def compare(self,other_user: dict):
+        """
+        This is used souly for the use of checking to see if we need to update users
+        """
+        # You shouldent be able to change your discord id
+        # if self.discord_id != other_user["discord_id"]:
+        #     return False
+        if self.username != other_user["name"]:
+            return False
+        if self.email != other_user["email"]:
+            return False
+        
+        return True

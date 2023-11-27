@@ -55,6 +55,9 @@ def cleanup_search(items, types = "types"):
         elif types == "spells":
             info = {"id": item[0], "name": item[1],
                 "effect": item[2], "dice": item[3], "level": item[4]} 
+        elif types == "user":
+            info = {"id": item[0], "discord_id": item[1], "name": item[2],
+                "is_admin": item[3], "email": item[4]} 
 
         data.append(info)
         ids.append(item[0])
