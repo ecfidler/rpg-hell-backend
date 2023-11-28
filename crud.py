@@ -159,5 +159,8 @@ def get_creature(id: int):
 def creature_search(name: str):
     return read.read_creature(name)
 
-def creature_delete(id):
+def creature_delete(id:int):
     return delete.delete_creature(id)
+
+def creature_update(id:int, new_creature:Creature):
+    return update.update_creature(id,new_creature)

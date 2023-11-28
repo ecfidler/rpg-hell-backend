@@ -4,7 +4,7 @@ import apiroutes.auth as auth
 
 from typing import Annotated
 
-from crud import create_creature, creature_delete, get_creature
+from crud import create_creature, creature_delete, get_creature, creature_update
 from models import Creature
 
 creatures_router = APIRouter(tags=["Creatures"])
@@ -27,9 +27,9 @@ async def get_creature_by_id(id: Annotated[int, Path(title="The ID of the creatu
     return JSONResponse(content={"data": get_creature(id)}, status_code=status.HTTP_200_OK)
 
 
-# @spells_router.patch("/spell/{id}", tags=["Spells"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])
-# async def update_spell(id: int, spell: Spell):
-#     return JSONResponse(content={"data": update_spell(id, spell)}, status_code=status.HTTP_200_OK)
+@creatures_router.patch("/creature/{id}", tags=["Creatures"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])
+async def update_creature(id: int, creature: Creature):
+    return JSONResponse(content={"data": creature_update(id, creature)}, status_code=status.HTTP_200_OK)
 
 
 @creatures_router.delete("/creature/{id}", tags=["Creatures"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])
