@@ -184,38 +184,30 @@ def get_users(_ids: list[int] = []):
     return users, ids
 
 
+def read_creature(creature_id):
+    cursor = conn.cursor()
+    try:
+        query = f'''SELECT id, name, level, body, mind, soul, arcana, charm, crafting, thieving, nature, medicine, traits, spells, items, notes
+            from creatures WHERE id={int(creature_id)}'''
+    except:
+        query = f'''SELECT id, name, level, body, mind, soul, arcana, charm, crafting, thieving, nature, medicine, traits, spells, items, notes 
+            from creatures WHERE name="{str(creature_id)}"'''
+        
+    creature = read_one(query, cursor)
 
-# def read_creature(object_id):
-#     cursor = conn.cursor()
-#     try:
-#         query = f"SELECT id, name, effect FROM objects WHERE id={int(object_id)}"
-#     except:
-#         query = f'SELECT id, name, effect FROM objects WHERE name="{str(object_id).lower()}"'
+    query = f"SELECT name FROM creature_types WHERE creature_id={creature[0]}"
+    types = read_list(query, cursor)
 
-#     item = read_one(query, cursor)
+    # huh so this cant work since all the items are words not id values
+    # traits = get_traits([int(a) for a in creature[12].split(', ')]) 
+    # spells = get_spells([int(a) for a in creature[13].split(', ')])
+    # items = get_items([int(a) for a in creature[14].split(', ')])
 
-#     query = f"SELECT type, value FROM requirements WHERE object_id={item[0]}"
-#     req = read_list(query, cursor, ignore_missing=True)
-
-#     info = {"id": item[0], "name": item[1], "effect": item[2], "req": req}
-
-#     # traits
-#     query = f"SELECT dice, is_passive FROM traits WHERE id={info['id']}"
-#     trait_data = read_one(query, cursor, ignore_missing=True)
-#     if trait_data != None:
-#         info["dice"] = trait_data[0]
-#         info["is_passive"] = trait_data[1]
-
-#     # items
-#     query = f"SELECT cost, craft FROM items WHERE id={info['id']}"
-#     item_data = read_one(query, cursor, ignore_missing=True)
-#     if item_data != None:
-#         info["cost"] = item_data[0]
-#         info["craft"] = item_data[1]
-
-#         query = f"SELECT name, value FROM item_tags WHERE item_id={info['id']}"
-#         tags = read_list(query, cursor)
-#         info["tags"] = tags
-
-#     cursor.close()
-#     return info
+    cursor.close()
+    return {
+        "id": creature[0], "name": creature[1], "level": creature[2], 
+        "body": creature[3], "mind": creature[4], "soul": creature[5], 
+        "arcana": creature[6],"charm": creature[7],"crafting": creature[8],"thieving": creature[9],"nature": creature[10],"medicine": creature[11],
+        "traits": creature[12].split(', '),"spells": creature[13].split(', '),"items": creature[14].split(', '),
+        "notes": creature[15],"tags": types
+            }

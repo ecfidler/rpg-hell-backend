@@ -4,7 +4,7 @@ import apiroutes.auth as auth
 
 from typing import Annotated
 
-from crud import create_spell, get_all_spells as get_all, update_spell, delete_spell, spell_search as search, get_spell, filter_spell
+from crud import create_spell, get_all_spells as get_all, update_spell, spell_delete, spell_search as search, get_spell, filter_spell
 
 from models import Spell
 
@@ -25,7 +25,7 @@ async def get_all_spells():
 
 @spells_router.get("/spell/{id}", tags=["Spells"])
 async def get_spell_by_id(id: Annotated[int, Path(title="The ID of the spell to get")]):
-    return JSONResponse(content={"data": get_spell(int)}, status_code=status.HTTP_200_OK)
+    return JSONResponse(content={"data": get_spell(id)}, status_code=status.HTTP_200_OK)
 
 
 @spells_router.patch("/spell/{id}", tags=["Spells"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])
@@ -35,7 +35,7 @@ async def update_spell(id: int, spell: Spell):
 
 @spells_router.delete("/spell/{id}", tags=["Spells"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])
 async def delete_spell(id: int):
-    return JSONResponse(content={"data": delete_spell(id)}, status_code=status.HTTP_200_OK)
+    return JSONResponse(content={"data": spell_delete(id)}, status_code=status.HTTP_200_OK)
 
 
 @spells_router.put("/spell/", tags=["Spells"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])

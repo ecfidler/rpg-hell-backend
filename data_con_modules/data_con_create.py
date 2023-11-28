@@ -158,7 +158,6 @@ def create_creature(obj:Creature, cursor, _id: int = 0):
     try:
         cursor.execute(query)
         obj.id = cursor.lastrowid  # needed in order to have an id for the next step
-        print(obj.id)
         # add_creature_tags(obj, cursor)
         add_creature_types(obj, cursor)
     except:

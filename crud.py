@@ -110,7 +110,7 @@ def update_spell(id: int, new_spell: Spell):
     return update.update_spell(id, new_spell)
 
 
-def delete_spell(id):
+def spell_delete(id):
     return delete.delete_spell(id)
 
 
@@ -152,3 +152,12 @@ def update_user(user: DBUser):
 
 def create_creature(creature: Creature):
     return create.create(creature)
+
+def get_creature(id: int):
+    return read.read_creature(id)
+
+def creature_search(name: str):
+    return read.read_creature(name)
+
+def creature_delete(id):
+    return delete.delete_creature(id)

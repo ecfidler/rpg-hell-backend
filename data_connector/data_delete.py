@@ -2,7 +2,7 @@ from data_con_modules.data_core import conn
 
 from data_con_modules.data_con_del import delete_core
 
-from data_connector.data_read import read_object, read_spell, read_user_from_discord_id
+from data_connector.data_read import read_object, read_spell, read_user_from_discord_id, read_creature
 
 #######################################################################
 ########################### Delete Commands ###########################
@@ -95,3 +95,23 @@ def delete_user(user_id):
 
     return {"id": item_id}
 
+
+def delete_creature(creature):
+    item_id = read_creature(creature)["id"]
+    cursor = conn.cursor()
+    try:
+        print("Del creature types")
+        delete_core(item_id, "creature_types", cursor)
+        print("Del creature")
+        delete_core(item_id, "creatures", cursor)
+
+        print(f"Deleated {creature} from database")
+        conn.commit()
+        cursor.close()
+    except:
+        cursor.close()
+        conn.rollback()
+        raise Exception("Del creature error")
+        
+
+    return {"id": item_id}
