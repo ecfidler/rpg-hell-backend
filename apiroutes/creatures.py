@@ -27,17 +27,17 @@ async def get_creature_by_id(id: Annotated[int, Path(title="The ID of the creatu
     return JSONResponse(content={"data": get_creature(id)}, status_code=status.HTTP_200_OK)
 
 
-@creatures_router.patch("/creature/{id}", tags=["Creatures"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])
+@creatures_router.patch("/creature/{id}", tags=["Creatures"], dependencies=[Depends(auth.admin)])
 async def update_creature(id: int, creature: Creature):
     return JSONResponse(content={"data": creature_update(id, creature)}, status_code=status.HTTP_200_OK)
 
 
-@creatures_router.delete("/creature/{id}", tags=["Creatures"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])
+@creatures_router.delete("/creature/{id}", tags=["Creatures"], dependencies=[Depends(auth.admin)])
 async def delete_creature(id: int):
     return JSONResponse(content={"data": creature_delete(id)}, status_code=status.HTTP_200_OK)
 
 
-@creatures_router.put("/creature/", tags=["Creatures"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])
+@creatures_router.put("/creature/", tags=["Creatures"], dependencies=[Depends(auth.admin)])
 async def put_creature(creature: Creature):
     res = create_creature(creature)
     if (res == -1):

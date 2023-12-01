@@ -1,6 +1,6 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi_discord import DiscordOAuthClient, Unauthorized, User
 
 from crud import get_create_user, get_user
@@ -21,8 +21,16 @@ discord = DiscordOAuthClient(
 auth_router = APIRouter(tags=["Users"])
 
 
-async def admin(user: Annotated[User, Depends(discord.user)]):
-    is_user_admin = get_user(user.id).get("is_admin")
+async def discord_credentials(request: Request):
+    print(request.cookies)
+    auth_token = request.cookies.get("discord_access_token")
+    if auth_token is None or await discord.isAuthenticated(auth_token) == False:
+        raise Unauthorized
+    return User(**(await discord.request("/users/@me", auth_token)))
+
+
+async def admin(user: Annotated[User, Depends(discord_credentials)]):
+    # is_user_admin = get_user(user.id).get("is_admin") # this is the actual logic
     if (user.id == "173839815400357888") or (user.id == "275002179763306517"):  # etan-josh
         return True
     else:
@@ -43,26 +51,28 @@ async def login():
 async def callback(code: str):
     token, refresh_token = await discord.get_access_token(code)
 
-    response = JSONResponse(
-        content={"access_token": token, "refresh_token": refresh_token, })  # "user": userData
-    response.set_cookie(key="access_token", value=token,
-                        httponly=True, secure=True)
-    response.set_cookie(key="refresh_token",
-                        value=refresh_token, httponly=True, secure=True)
+    # TODO: CHANGE THIS URL TO BE AN ACTUAL URL ON THE SITE
+    response = RedirectResponse(url="http://localhost:8000/docs")
 
-    return response  # change to a redirect response when working on front-end?
+    response.set_cookie(key="discord_access_token",
+                        value=token, httponly=True, secure=True)
+    response.set_cookie(key="discord_refresh_token",
+                        value=refresh_token, httponly=True, secure=True)
+    print(response)
+    return response
 
 
 @auth_router.get("/refresh")
 async def refresh(refresh_token: str):
     new_token, new_refresh_token = await discord.refresh_access_token(refresh_token)
-    response = JSONResponse(
-        content={"access_token": new_token, "refresh_token": new_refresh_token})
-    response.set_cookie(key="access_token", value=new_token,
-                        httponly=True, secure=True)
-    response.set_cookie(key="refresh_token",
+
+    # TODO: CHANGE THIS URL TO BE AN ACTUAL URL ON THE SITE
+    response = RedirectResponse(url="http://localhost:8000/docs")
+    response.set_cookie(key="discord_access_token",
+                        value=new_token, httponly=True, secure=True)
+    response.set_cookie(key="discord_refresh_token",
                         value=new_refresh_token, httponly=True, secure=True)
-    return response  # change to a redirect response when working on front-end?
+    return response
 
 
 @auth_router.get(
@@ -77,14 +87,18 @@ async def isAuthenticated(token: str = Depends(discord.get_token)):
     except Unauthorized:
         return False
 
+# @auth_router.get("/user", dependencies=[Depends(discord.requires_authorization)], response_model=User)
+# async def get_discord_user(user: User = Depends(discord.user)):
+#     return user
 
-@auth_router.get("/user", dependencies=[Depends(discord.requires_authorization)], response_model=User)
-async def get_discord_user(user: User = Depends(discord.user)):
+
+@auth_router.get("/user", dependencies=[Depends(discord_credentials)])
+async def get_discord_user(user: User = Depends(discord_credentials)):
     return user
 
 
-@auth_router.get("/me", dependencies=[Depends(discord.requires_authorization)])
-async def get_or_create_database_user(user: User = Depends(discord.user)):
+@auth_router.get("/me", dependencies=[Depends(discord_credentials)])
+async def get_or_create_database_user(user: User = Depends(discord_credentials)):
     res = get_create_user(
         DBUser(discord_id=user.id, username=user.username, email=user.email))
     # res.avatar_url = user.avatar_url

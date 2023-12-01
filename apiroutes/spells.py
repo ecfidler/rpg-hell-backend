@@ -28,17 +28,17 @@ async def get_spell_by_id(id: Annotated[int, Path(title="The ID of the spell to 
     return JSONResponse(content={"data": get_spell(id)}, status_code=status.HTTP_200_OK)
 
 
-@spells_router.patch("/spell/{id}", tags=["Spells"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])
+@spells_router.patch("/spell/{id}", tags=["Spells"], dependencies=[Depends(auth.admin)])
 async def update_spell(id: int, spell: Spell):
     return JSONResponse(content={"data": update_spell(id, spell)}, status_code=status.HTTP_200_OK)
 
 
-@spells_router.delete("/spell/{id}", tags=["Spells"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])
+@spells_router.delete("/spell/{id}", tags=["Spells"], dependencies=[Depends(auth.admin)])
 async def delete_spell(id: int):
     return JSONResponse(content={"data": spell_delete(id)}, status_code=status.HTTP_200_OK)
 
 
-@spells_router.put("/spell/", tags=["Spells"], dependencies=[Depends(auth.discord.requires_authorization), Depends(auth.admin)])
+@spells_router.put("/spell/", tags=["Spells"], dependencies=[Depends(auth.admin)])
 async def put_spell(spell: Spell):
     res = create_spell(spell)
     if (res == -1):
