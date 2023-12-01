@@ -15,18 +15,24 @@ discord = DiscordOAuthClient(
     client_id=settings.discord_client_id,
     client_secret=settings.discord_client_secret,
     redirect_uri=settings.discord_redirect_uri,
-    scopes=("identify", "guilds", "email")
+    scopes=("identify", "email")  # , "guilds"
 )
 
 auth_router = APIRouter(tags=["Users"])
 
 
 async def discord_credentials(request: Request):
-    print(request.cookies)
     auth_token = request.cookies.get("discord_access_token")
     if auth_token is None or await discord.isAuthenticated(auth_token) == False:
         raise Unauthorized
     return User(**(await discord.request("/users/@me", auth_token)))
+
+
+async def refresh_credentials(request: Request):
+    refresh_token = request.cookies.get("discord_refresh_token")
+    if refresh_token is None:
+        raise Unauthorized
+    return refresh_token
 
 
 async def admin(user: Annotated[User, Depends(discord_credentials)]):
@@ -63,7 +69,7 @@ async def callback(code: str):
 
 
 @auth_router.get("/refresh")
-async def refresh(refresh_token: str):
+async def refresh(refresh_token: str = Depends(refresh_credentials)):
     new_token, new_refresh_token = await discord.refresh_access_token(refresh_token)
 
     # TODO: CHANGE THIS URL TO BE AN ACTUAL URL ON THE SITE
@@ -75,22 +81,17 @@ async def refresh(refresh_token: str):
     return response
 
 
-@auth_router.get(
-    "/authenticated",
-    dependencies=[Depends(discord.requires_authorization)],
-    response_model=bool,
-)
-async def isAuthenticated(token: str = Depends(discord.get_token)):
-    try:
-        auth = await discord.isAuthenticated(token)
-        return auth
-    except Unauthorized:
-        return False
-
-# @auth_router.get("/user", dependencies=[Depends(discord.requires_authorization)], response_model=User)
-# async def get_discord_user(user: User = Depends(discord.user)):
-#     return user
-
+# @auth_router.get(
+#     "/authenticated",
+#     dependencies=[Depends(discord.requires_authorization)],
+#     response_model=bool,
+# )
+# async def isAuthenticated(token: str = Depends(discord.get_token)):
+#     try:
+#         auth = await discord.isAuthenticated(token)
+#         return auth
+#     except Unauthorized:
+#         return False
 
 @auth_router.get("/user", dependencies=[Depends(discord_credentials)])
 async def get_discord_user(user: User = Depends(discord_credentials)):
@@ -101,5 +102,5 @@ async def get_discord_user(user: User = Depends(discord_credentials)):
 async def get_or_create_database_user(user: User = Depends(discord_credentials)):
     res = get_create_user(
         DBUser(discord_id=user.id, username=user.username, email=user.email))
-    # res.avatar_url = user.avatar_url
+    res["avatar_url"] = user.avatar_url
     return res
