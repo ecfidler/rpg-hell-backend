@@ -1,6 +1,6 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi import APIRouter, Depends, Request, status
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi_discord import DiscordOAuthClient, Unauthorized, User
 
 from crud import get_create_user, get_user
@@ -70,15 +70,24 @@ async def callback(code: str):
 
 @auth_router.get("/refresh")
 async def refresh(refresh_token: str = Depends(refresh_credentials)):
-    new_token, new_refresh_token = await discord.refresh_access_token(refresh_token)
+
+    try:
+        new_token, new_refresh_token = await discord.refresh_access_token(refresh_token)
+        response = Response(content=True, status_code=status.HTTP_202_ACCEPTED)
+        response.set_cookie(key="discord_access_token",
+                            value=new_token, httponly=True, secure=True)
+        response.set_cookie(key="discord_refresh_token",
+                            value=new_refresh_token, httponly=True, secure=True)
+    except Unauthorized:
+        response = Response(
+            content=False, status_code=status.HTTP_401_UNAUTHORIZED)
+    except:
+        response = Response(
+            content=False, status_code=status.HTTP_400_BAD_REQUEST)
+    finally:
+        return response
 
     # TODO: CHANGE THIS URL TO BE AN ACTUAL URL ON THE SITE
-    response = RedirectResponse(url="http://localhost:8000/docs")
-    response.set_cookie(key="discord_access_token",
-                        value=new_token, httponly=True, secure=True)
-    response.set_cookie(key="discord_refresh_token",
-                        value=new_refresh_token, httponly=True, secure=True)
-    return response
 
 
 # @auth_router.get(
