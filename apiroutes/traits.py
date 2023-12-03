@@ -11,7 +11,7 @@ from models import Trait
 traits_router = APIRouter(tags=["Traits"])
 
 
-@traits_router.put("/trait/", tags=["Traits"], dependencies=[Depends(auth.admin)])
+@traits_router.put("/trait/", dependencies=[Depends(auth.admin)])
 # Annotated[Trait, Query(title="The new trait to be added")]
 async def put_trait(trait: Trait):
     res = create_trait(trait)
@@ -22,22 +22,23 @@ async def put_trait(trait: Trait):
         return JSONResponse(content={"id": res}, status_code=status.HTTP_200_OK)
 
 
-@traits_router.get("/traits/", tags=["Traits"])
+@traits_router.get("/traits/", response_model=dict[int, Trait])
 async def get_all_traits():
-    res = get_all()
-    return JSONResponse(content={"data": res[0], "ids": res[1]}, status_code=status.HTTP_200_OK)
+    # return JSONResponse(content={"data": res[0], "ids": res[1]}, status_code=status.HTTP_200_OK)
+    return get_all()
 
 
-@traits_router.patch("/trait/{id}", tags=["Traits"], dependencies=[Depends(auth.admin)])
+@traits_router.patch("/trait/{id}", dependencies=[Depends(auth.admin)])
 async def update_trait(id: int, trait: Trait):
     return JSONResponse(content={"data": update_trait(id, trait)}, status_code=status.HTTP_200_OK)
 
 
-@traits_router.delete("/trait/{id}", tags=["Traits"], dependencies=[Depends(auth.admin)])
+@traits_router.delete("/trait/{id}", dependencies=[Depends(auth.admin)])
 async def delete_trait(id: int):
     return JSONResponse(content={"data": delete_trait(id)}, status_code=status.HTTP_200_OK)
 
 
-@traits_router.get("/filtertraits/")
+@traits_router.get("/filtertraits/", response_model=dict[int, Trait])
 async def filter_traits_by_requirements(requirements: Annotated[str, Query(description="csv")]):
-    return JSONResponse(content={"data": filter_trait(requirements)}, status_code=status.HTTP_200_OK)
+    # return JSONResponse(content={"data": filter_trait(requirements)}, status_code=status.HTTP_200_OK)
+    return filter_trait(requirements)

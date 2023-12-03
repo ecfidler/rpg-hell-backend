@@ -35,7 +35,8 @@ def object_search(name: str):
 
 
 def get_all_items():
-    return read.get_items()
+    items, ids = read.get_items()
+    return dict(zip(ids, items))
 
 
 def create_item(item: Item):
@@ -70,7 +71,8 @@ def create_trait(trait: Trait):
 
 
 def get_all_traits():
-    return read.get_traits()
+    traits, ids = read.get_traits()
+    return dict(zip(ids, traits))
 
 
 def update_trait(id: int, new_trait: Trait):
@@ -99,7 +101,8 @@ def spell_search(name: str):
 
 
 def get_all_spells():
-    return read.get_spells()
+    spells, ids = read.get_spells()
+    return dict(zip(ids, spells))
 
 
 def create_spell(spell: Spell):
@@ -125,7 +128,7 @@ def filter_spell(tags: str):
 def get_create_user(user: DBUser):
     try:
         res = get_user(user.discord_id)
-        
+
         if not user.compare(res):
             user.id = res["id"]
             res = update_user(user)
@@ -145,7 +148,7 @@ def create_user(user: DBUser):
 
 
 def update_user(user: DBUser):
-    return update.update_user(user.id,user)
+    return update.update_user(user.id, user)
 
 
 # creatures
@@ -153,14 +156,18 @@ def update_user(user: DBUser):
 def create_creature(creature: Creature):
     return create.create(creature)
 
+
 def get_creature(id: int):
     return read.read_creature(id)
+
 
 def creature_search(name: str):
     return read.read_creature(name)
 
-def creature_delete(id:int):
+
+def delete_creature(id: int):
     return delete.delete_creature(id)
 
-def creature_update(id:int, new_creature:Creature):
-    return update.update_creature(id,new_creature)
+
+def update_creature(id: int, new_creature: Creature):
+    return update.update_creature(id, new_creature)

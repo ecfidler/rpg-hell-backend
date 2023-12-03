@@ -1,5 +1,4 @@
-
-from data_connector.data_delete import delete_trait, delete_item, delete_spell, delete_user
+from data_connector.data_delete import delete_trait, delete_item, delete_spell, delete_user, delete_creature
 from data_connector.data_create import create, create_user
 from data_con_modules.data_core import conn
 
@@ -24,9 +23,11 @@ def update_spell(id: int, spell: Spell):
     delete_spell(id)
     return create(spell, id)
 
-def creature_update(id:int, creature: Creature):
+
+def update_creature(id: int, creature: Creature):
     delete_creature(id)
     return create(creature, id)
+
 
 def update_user(_id: int, user: DBUser):
 

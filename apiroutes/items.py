@@ -14,20 +14,19 @@ from enumeration import FilterOption
 items_router = APIRouter(tags=["Items"])
 
 
-@items_router.put("/item/", tags=["Items"], dependencies=[Depends(auth.admin)])
+@items_router.put("/item/", dependencies=[Depends(auth.admin)])
 async def put_item(item: Item):
     res = create_item(item)
     if (res == -1):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"it failed and we don't have proper error catching yet 😨")
     else:
-        return JSONResponse(content={"id": res}, status_code=status.HTTP_200_OK)
+        return JSONResponse(content={"data": res}, status_code=status.HTTP_200_OK)
 
 
-@items_router.get("/items/")
+@items_router.get("/items/", response_model=dict[int, Item])
 async def get_all_items():
-    res = get_all()
-    return JSONResponse(content={"data": res[0], "ids": res[1]}, status_code=status.HTTP_200_OK)
+    return get_all()
 
 
 @items_router.patch("/item/{id}", dependencies=[Depends(auth.admin)])
@@ -40,6 +39,6 @@ async def delete_item(id: int):
     return JSONResponse(content={"data": delete_item(id)}, status_code=status.HTTP_200_OK)
 
 
-@items_router.get("/filteritems/{option}")
+@items_router.get("/filteritems/{option}", response_model=dict[int, Item])
 async def filter_items_by_tags_or_requirements(option: Annotated[FilterOption, Path(description=" 0 = tags, 1 = requirements")], filters: Annotated[str, Query(description="csv")]):
     return JSONResponse(content={"data": filter_item(filters, option)}, status_code=status.HTTP_200_OK)

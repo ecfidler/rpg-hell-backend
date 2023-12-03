@@ -3,6 +3,9 @@ from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi_discord import DiscordOAuthClient, Unauthorized, User
 
+from models import Trait, Item, Spell, DBUser, Creature
+# from models import Trait, Item, Spell, DBUser, Creature
+
 from crud import get_create_user, get_user
 
 from models import DBUser
@@ -107,7 +110,7 @@ async def get_discord_user(user: User = Depends(discord_credentials)):
     return user
 
 
-@auth_router.get("/me", dependencies=[Depends(discord_credentials)])
+@auth_router.get("/me", dependencies=[Depends(discord_credentials)], response_model=DBUser)
 async def get_or_create_database_user(user: User = Depends(discord_credentials)):
     res = get_create_user(
         DBUser(discord_id=user.id, username=user.username, email=user.email))

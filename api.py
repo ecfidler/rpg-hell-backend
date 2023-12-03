@@ -1,13 +1,13 @@
 from fastapi import FastAPI, HTTPException, status, Response, Path, Query, Depends
+from fastapi.routing import APIRoute
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 
 from fastapi_discord import Unauthorized
 
-from typing import Annotated
 
 import crud
-from models import Trait, Item, Spell
+# from models import Trait, Item, Spell
 
 from apiroutes.auth import auth_router, admin, discord_credentials
 from apiroutes.traits import traits_router
@@ -42,14 +42,20 @@ tags = [
         "description": ""
     },
     {
-        "name": "Users",
+        "name": "Users / Authentication",
         "description": ""
     }
 ]
 
+
+def custom_generate_unique_id(route: APIRoute):
+    return f"{route.tags[0]}-{route.name}"
+
+
 app = FastAPI(title="RPG Hell API",
               description="API for managing all of the data that exists in the RPG Hell tabletop game",
-              openapi_tags=tags)
+              openapi_tags=tags,
+              generate_unique_id_function=custom_generate_unique_id)
 
 origins = ["http://localhost", "https://localhost",
            "https://portof.yokohama", "http://portof.yokohama"]
@@ -70,7 +76,33 @@ app.include_router(objects_router)
 app.include_router(creatures_router)
 
 
-@app.get("/")
+@app.on_event("startup")
+async def startup():
+    import json
+    import aiofiles
+
+    async with aiofiles.open("./openapi.json", 'w+') as afp:
+        my_bytes_value = json.dumps(app.openapi()).encode(
+            "utf-8").decode().replace("'", '"')
+        await afp.write(my_bytes_value)
+
+    from pathlib import Path as LibPath
+
+    file_path = LibPath("./openapi.json")
+    openapi_content = json.loads(file_path.read_text())
+
+    for path_data in openapi_content["paths"].values():
+        for operation in path_data.values():
+            tag = operation["tags"][0]
+            operation_id = operation["operationId"]
+            to_remove = f"{tag}-"
+            new_operation_id = operation_id[len(to_remove):]
+            operation["operationId"] = new_operation_id
+
+    file_path.write_text(json.dumps(openapi_content))
+
+
+@app.get("/", tags=["Temporary"])
 async def root():
     return {"message": "Hello, World!"}
 

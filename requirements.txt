@@ -6,4 +6,4 @@ pydantic_settings
 python-dotenv
 mysqlclient
 fastapi-discord
-python-jose[cryptography]
+aiofiles
