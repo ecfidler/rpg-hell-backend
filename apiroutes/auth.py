@@ -61,7 +61,7 @@ async def callback(code: str):
     token, refresh_token = await discord.get_access_token(code)
 
     # TODO: CHANGE THIS URL TO BE AN ACTUAL URL ON THE SITE
-    response = RedirectResponse(url="http://localhost:8000/docs")
+    response = RedirectResponse(url="http://localhost/callback")
 
     response.set_cookie(key="discord_access_token",
                         value=token, httponly=True, secure=True)
