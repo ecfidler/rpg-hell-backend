@@ -57,7 +57,7 @@ app = FastAPI(title="RPG Hell API",
               openapi_tags=tags,
               generate_unique_id_function=custom_generate_unique_id)
 
-origins = ["http://localhost", "https://localhost",
+origins = ["http://localhost:5173", "https://localhost:5173",
            "https://portof.yokohama", "http://portof.yokohama"]
 
 app.add_middleware(
