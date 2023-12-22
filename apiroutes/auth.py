@@ -56,12 +56,23 @@ async def login():
     return {"url": discord.oauth_login_url}
 
 
+@auth_router.get("/logout")
+async def logout():
+    response = RedirectResponse(url="http://localhost:5173/callback")
+    response.delete_cookie(key="discord_access_token",
+                           httponly=True, secure=True)
+    response.delete_cookie(key="discord_refresh_token",
+                           httponly=True, secure=True)
+
+    return response
+
+
 @auth_router.get("/auth/discord/callback")
 async def callback(code: str):
     token, refresh_token = await discord.get_access_token(code)
 
     # TODO: CHANGE THIS URL TO BE AN ACTUAL URL ON THE SITE
-    response = RedirectResponse(url="http://localhost/callback")
+    response = RedirectResponse(url="http://localhost:5173/callback")
 
     response.set_cookie(key="discord_access_token",
                         value=token, httponly=True, secure=True)
