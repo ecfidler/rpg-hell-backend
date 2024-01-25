@@ -58,7 +58,7 @@ async def login():
 
 @auth_router.get("/logout")
 async def logout():
-    response = RedirectResponse(url="http://localhost:5173/callback")
+    response = RedirectResponse(url="http://quiltic.github.io/rpg-hell-frontend/callback")
     response.delete_cookie(key="discord_access_token",
                            httponly=True, secure=True)
     response.delete_cookie(key="discord_refresh_token",
@@ -72,7 +72,7 @@ async def callback(code: str):
     token, refresh_token = await discord.get_access_token(code)
 
     # TODO: CHANGE THIS URL TO BE AN ACTUAL URL ON THE SITE
-    response = RedirectResponse(url="http://localhost:5173/callback")
+    response = RedirectResponse(url="http://quiltic.github.io/rpg-hell-frontend/callback")
 
     response.set_cookie(key="discord_access_token",
                         value=token, httponly=True, secure=True)
