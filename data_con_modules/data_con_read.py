@@ -1,5 +1,7 @@
 from fastapi import HTTPException
 
+from data_con_modules.data_core import do_query, do_query_one
+
 def cleanup_tags(tags):
     t = []
     for tag in tags:
@@ -8,8 +10,6 @@ def cleanup_tags(tags):
         else:
             t.append(str(tag[0]))
     return t
-
-
 
 
 def tag_type(tag):
@@ -65,9 +65,8 @@ def cleanup_search(items, types = "types"):
 
 
 
-def read_one(query, cursor, ignore_missing=False):
-    cursor.execute(query)
-    item = cursor.fetchone()
+def read_one(query, conn, ignore_missing=False):
+    item = do_query_one(query,conn)
 
     if item is None and not ignore_missing:
         raise HTTPException(status_code=404, detail=f"Item not found with query: {query}")
@@ -76,9 +75,10 @@ def read_one(query, cursor, ignore_missing=False):
 
 
 
-def read_list(query, cursor, ignore_missing=False):
-    cursor.execute(query)
-    dirty_list = cursor.fetchall()
+def read_list(query, conn, ignore_missing=False):
+    dirty_list = do_query(query, conn)
+    if dirty_list == -1: # check error
+        return -1
 
     if dirty_list is None and not ignore_missing:
         raise HTTPException(status_code=404, detail=f"Item not found with query: {query}")

@@ -1,4 +1,5 @@
 
+from data_con_modules.data_core import do_query, do_query_lastID
 from models import Creature, Item, Trait, Spell
 
 #######################################################################
@@ -6,7 +7,7 @@ from models import Creature, Item, Trait, Spell
 #######################################################################
 
 
-def add_requirements(obj, cursor):
+def add_requirements(obj, conn):
     if obj.req != None and obj.req != []:
         query = "INSERT INTO requirements (object_id, type, value) VALUES "
         for rq in obj.req:
@@ -17,36 +18,38 @@ def add_requirements(obj, cursor):
                 val = 1
             query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
         query = query[:-1]+";"  # required to do magic for later
-        try:
-            cursor.execute(query)
-        except:
-            print(query)
-            Exception("Requirements query broke")
+
+        qItem = do_query(query, conn)
+        if qItem == -1: # check error
+            return -1
 
     return obj
 
 
-def create_obj(obj, cursor, _id: int = 0): 
+def create_obj(obj, conn,  _id: int = 0): 
     query = f'INSERT INTO objects (name, effect) VALUES ("{obj.name}", "{obj.effect}");'
     if _id:
         query = f'INSERT INTO objects (id, name, effect) VALUES ({_id}, "{obj.name}", "{obj.effect}");'
+    print(query)
 
-    try:
-        cursor.execute(query)
-        obj.id = cursor.lastrowid  # needed in order to have an id for the next step
-        add_requirements(obj, cursor)
-    except:
-        print(query)
-        Exception("Creation Obj Broke")
+    qItem = do_query_lastID(query,conn)
+    if qItem == -1: # check error
+        return -1
+    
+    obj.id = qItem  # needed in order to have an id for the next step
+    qItem = add_requirements(obj, conn)
+    if qItem == -1:
+        return -1
+    
     return obj
 
 
 # Route to create an item
 # @app.post("/items/", response_model=Item)
-def create_item(obj: Item, cursor, _id: int = 0): 
-    create_obj(obj, cursor, _id)
+def create_item(obj: Item, conn, _id: int = 0): 
+    create_obj(obj, conn, _id)
     if obj.tags != None:
-        query = "INSERT INTO items (id, cost, craft) VALUES (%s,%s,%s); INSERT INTO item_tags (item_id, name, value) VALUES "
+        query = f"INSERT INTO items (id, cost, craft) VALUES ({obj.id}, {obj.cost}, {obj.craft}); INSERT INTO item_tags (item_id, name, value) VALUES "
         for tag in obj.tags:
             # print(tag)
             if "damage" in tag:  # damage is backwards...
@@ -67,54 +70,53 @@ def create_item(obj: Item, cursor, _id: int = 0):
 
             query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
         query = query[:-1]+";"  # required to do magic for later
-        try:
-            cursor.execute(query, (obj.id, obj.cost, obj.craft))
-        except:
-            print(query)
-            Exception("Item query Broke")
-        # print(query)
+
+        qItem = do_query(query, conn)
+        if qItem == -1: # check error
+            return -1
+        
     return obj
 
 
-def create_trait(obj: Trait, cursor, _id: int = 0): 
-    create_obj(obj, cursor, _id)
-    query = "INSERT INTO traits (id, dice, is_passive) VALUES (%s,%s,%s)"
-    try:
-        cursor.execute(query, (obj.id, obj.dice, obj.is_passive))
-    except Exception as e:
-        print(query)
-        print(e)
-        Exception()
+def create_trait(obj: Trait, conn, _id: int = 0): 
+    create_obj(obj, conn, _id)
+    query = f"INSERT INTO traits (id, dice, is_passive) VALUES ({obj.id},{obj.dice},{obj.is_passive})"
+    qItem = do_query(query,conn)
+    if qItem == -1: # check error
+        return -1
     return obj
 
 
-def add_spell_tags(obj: Spell, cursor): 
+def add_spell_tags(obj: Spell, conn): 
     if obj.tags != None:
         query = "INSERT INTO spell_tags (spell_id, name) VALUES "
         for tag in obj.tags:
             query += f'({obj.id}, "{str(tag).lower()}"),'
         query = query[:-1]+";"  # required to do magic for later
-        try:
-            cursor.execute(query)
-        except:
-            print(query)
-            Exception("Spell Tag query Broke")
+
+        qItem = do_query(query, conn)
+        if qItem == -1: # check error
+            return -1
 
     return obj
 
 
-def create_spell(obj: Spell, cursor, _id: int = 0):
+def create_spell(obj: Spell, conn, _id: int = 0):
     query = f'INSERT INTO spells (name, effect, dice, level) VALUES ("{obj.name}", "{obj.effect}", {int(obj.dice)}, {int(obj.level)});'
     if _id:
         query = f'INSERT INTO spells (id, name, effect, dice, level) VALUES ({_id},"{obj.name}", "{obj.effect}", {int(obj.dice)}, {int(obj.level)});'
 
-    try:
-        cursor.execute(query)
-        obj.id = cursor.lastrowid  # needed in order to have an id for the next step
-        add_spell_tags(obj, cursor)
-    except:
-        print(query)
-        Exception("Spell query Broke")
+
+    qItem = do_query_lastID(query, conn)
+    if qItem == -1: # check error
+        return -1
+    
+    obj.id = qItem  # needed in order to have an id for the next step
+    
+    qItem = add_spell_tags(obj,conn)
+    if qItem == -1:
+        return -1
+    
     return obj
 
 

@@ -1,9 +1,9 @@
-from data_con_modules.data_core import conn
-
+import MySQLdb
 from data_con_modules.data_con_del import delete_core
 
 from data_connector.data_read import read_object, read_spell, read_user_from_discord_id, read_creature
 
+from data_con_modules.data_core import db_config
 #######################################################################
 ########################### Delete Commands ###########################
 #######################################################################
@@ -11,107 +11,97 @@ from data_connector.data_read import read_object, read_spell, read_user_from_dis
 
 def delete_item(item):
     item_id = read_object(item)["id"]
-    cursor = conn.cursor()
-    print(item_id)
-    try:
-        print("Del item tags")
-        delete_core(item_id, "item_tags", cursor)
 
-        print("Del item")
-        delete_core(item_id, "items", cursor)
-        print("Del requirements")
-        delete_core(item_id, "requirements", cursor)
-        print("Del object")
-        delete_core(item_id, "objects", cursor)
+    conn = MySQLdb.connect(**db_config)
+    
+    print("Del item tags")
+    dl = delete_core(item_id, "item_tags", conn)
+    if dl == -1:
+        return -1
 
-        print(f"Deleated {item} from database")
-        conn.commit()
-        cursor.close()
-    except:
-        print("Del item error")
-        cursor.close()
-        conn.rollback()
+    print("Del item")
+    delete_core(item_id, "items",conn)
+    if dl == -1:
+        return -1
 
+    print("Del requirements")
+    delete_core(item_id, "requirements",conn)
+    if dl == -1:
+        return -1
+    
+    print("Del object")
+    delete_core(item_id, "objects")
+    if dl == -1:
+        return -1
+
+    print(f"Deleated {item} from database")
+    
     return {"id": item_id}
 
 
 def delete_trait(trait):
     item_id = read_object(trait)["id"]
-    cursor = conn.cursor()
-    try:
-        print("Del traits")
-        delete_core(item_id, "traits", cursor)
-        print("Del requirements")
-        delete_core(item_id, "requirements", cursor)
-        print("Del object")
-        delete_core(item_id, "objects", cursor)
 
-        print(f"Deleated {trait} from database")
 
-        conn.commit()
-        cursor.close()
-    except:
-        print("Del item error")
-        cursor.close()
-        conn.rollback()
+    print("Del traits")
+    dl = delete_core(item_id, "traits")
+    if dl == -1:
+        return -1
+    
+    print("Del requirements")
+    delete_core(item_id, "requirements")
+    if dl == -1:
+        return -1
+    
+    print("Del object")
+    delete_core(item_id, "objects")
+    if dl == -1:
+        return -1
+
+    print(f"Deleated {trait} from database")
 
     return {"id": item_id}
 
 
 def delete_spell(spell):
     item_id = read_spell(spell)["id"]
-    cursor = conn.cursor()
-    try:
-        print("Del spell tags")
-        delete_core(item_id, "spell_tags", cursor)
-        print("Del spell")
-        delete_core(item_id, "spells", cursor)
 
-        print(f"Deleated {spell} from database")
-        conn.commit()
-        cursor.close()
-    except:
-        print("Del spell error")
-        cursor.close()
-        conn.rollback()
+    print("Del spell tags")
+    dl = delete_core(item_id, "spell_tags")
+    if dl == -1:
+        return -1
+    
+    print("Del spell")
+    dl = delete_core(item_id, "spells")
+    if dl == -1:
+        return -1
 
+    print(f"Deleated {spell} from database")
     return {"id": item_id}
 
 
 def delete_user(user_id):
     item_id = read_user_from_discord_id(user_id)["id"]
-    cursor = conn.cursor()
-    try:
-        print("Del user")
-        delete_core(item_id, "users", cursor)
-
-        print(f"Deleated {user_id} from database")
-        conn.commit()
-        cursor.close()
-    except:
-        print("Del user error")
-        cursor.close()
-        conn.rollback()
+    
+    print("Del user")
+    dl = delete_core(item_id, "users")
+    if dl == -1:
+        return -1
+    print(f"Deleated {user_id} from database")
 
     return {"id": item_id}
 
 
 def delete_creature(creature):
     item_id = read_creature(creature)["id"]
-    cursor = conn.cursor()
-    try:
-        print("Del creature types")
-        delete_core(item_id, "creature_types", cursor)
-        print("Del creature")
-        delete_core(item_id, "creatures", cursor)
+    
+    print("Del creature types")
+    dl = delete_core(item_id, "creature_types")
+    print("Del creature")
+    dl = delete_core(item_id, "creatures")
 
-        print(f"Deleated {creature} from database")
-        conn.commit()
-        cursor.close()
-    except:
-        cursor.close()
-        conn.rollback()
+    if dl == -1:
         raise Exception("Del creature error")
         
-
+    print(f"Deleated {creature} from database")
     return {"id": item_id}

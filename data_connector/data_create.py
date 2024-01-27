@@ -1,8 +1,10 @@
+import MySQLdb
 from models import Object, Item, Trait, Spell, DBUser, Creature
 
 from data_con_modules.data_core import conn
 from data_con_modules.data_con_create import create_obj, create_item, create_spell, create_trait, create_creature
 
+from data_con_modules.data_core import db_config
 
 #######################################################################
 ########################## Creation Commands ##########################
@@ -10,7 +12,8 @@ from data_con_modules.data_con_create import create_obj, create_item, create_spe
 
 
 def create(obj, _id: int = None):
-    cursor = conn.cursor()
+    conn = MySQLdb.connect(**db_config)
+    # cursor = conn.cursor()
     print("Start Creation")
 
     try:
@@ -18,32 +21,37 @@ def create(obj, _id: int = None):
 
         if clss == Object:
             print("Creating Obj")
-            obj = create_obj(obj, cursor, _id)
+            obj = create_obj(obj, conn, _id)
         # match (switch) cases dont work for objects aparently
         elif clss == Item:
             print("Creating Item")
-            obj = create_item(obj, cursor, _id)
+            obj = create_item(obj, conn, _id)
         elif clss == Trait:
             print("Creating Trait")
-            obj = create_trait(obj, cursor, _id)
+            obj = create_trait(obj, conn, _id)
         elif clss == Spell:
             print("Creating Spell")
-            obj = create_spell(obj, cursor, _id)
+            obj = create_spell(obj, conn, _id)
         elif clss == Creature:
             print("Creating Creature")
-            obj = create_creature(obj, cursor, _id)
+            obj = create_creature(obj, conn, _id)
         else:
             raise TypeError("it broke, no give item")
+        
+        if obj == -1:
+            raise Exception(f"Error occured in {clss}")
 
-        cursor.close()
+        # cursor.close()
         conn.commit()
+        conn.close()
         print("Creation Successful")
         return obj.id
 
     except:
-        print(f"Error occured in {clss}")
-        cursor.close()
+        # print(f"Error occured in {clss}")
+        # cursor.close()
         conn.rollback()
+        conn.close()
         return -1
 
 
