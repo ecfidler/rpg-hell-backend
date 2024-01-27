@@ -1,6 +1,9 @@
 from fastapi import HTTPException
 
+<<<<<<< HEAD
 from data_con_modules.data_core import do_query, do_query_one
+=======
+>>>>>>> 2bbdead0f6d9bc67e61789152c0b90f1139510da
 
 def cleanup_tags(tags):
     t = []
@@ -17,9 +20,9 @@ def tag_type(tag):
         return (tag[1], tag[2])
     except:
         return (tag[1],)
-    
 
-def cleanup_tags_req(objects,tags,typ):
+
+def cleanup_tags_req(objects, tags, typ):
     tag_lst = {}
     t = []
     _id = tags[0][0]  # get the first id
@@ -33,17 +36,17 @@ def cleanup_tags_req(objects,tags,typ):
             t.append(tag_type(tag))
 
     tag_lst[_id] = t
-    
+
     for obj in objects:
         obj[typ] = []
 
         if obj["id"] in tag_lst:
             obj[typ] = cleanup_tags(tag_lst[obj["id"]])
-    
+
     return objects
 
 
-def cleanup_search(items, types = "types"):
+def cleanup_search(items, types="types"):
     data, ids = [], []
     for item in items:
 
@@ -51,13 +54,13 @@ def cleanup_search(items, types = "types"):
                 "dice": item[3], "is_passive": item[4]}
         if types == "items":
             info = {"id": item[0], "name": item[1],
-                "effect": item[2], "cost": item[3], "craft": item[4]}
+                    "effect": item[2], "cost": item[3], "craft": item[4]}
         elif types == "spells":
             info = {"id": item[0], "name": item[1],
-                "effect": item[2], "dice": item[3], "level": item[4]} 
+                    "effect": item[2], "dice": item[3], "level": item[4]}
         elif types == "user":
             info = {"id": item[0], "discord_id": item[1], "username": item[2],
-                "is_admin": item[3], "email": item[4]} 
+                    "is_admin": item[3], "email": item[4]}
 
         data.append(info)
         ids.append(item[0])
@@ -69,20 +72,27 @@ def read_one(query, conn, ignore_missing=False):
     item = do_query_one(query,conn)
 
     if item is None and not ignore_missing:
-        raise HTTPException(status_code=404, detail=f"Item not found with query: {query}")
-    
+        raise HTTPException(
+            status_code=404, detail=f"Item not found with query: {query}")
+
     return item
 
 
-
+<<<<<<< HEAD
 def read_list(query, conn, ignore_missing=False):
     dirty_list = do_query(query, conn)
     if dirty_list == -1: # check error
         return -1
+=======
+def read_list(query, cursor, ignore_missing=False):
+    print(query)
+    cursor.execute(query)
+    dirty_list = cursor.fetchall()
+>>>>>>> 2bbdead0f6d9bc67e61789152c0b90f1139510da
 
     if dirty_list is None and not ignore_missing:
-        raise HTTPException(status_code=404, detail=f"Item not found with query: {query}")
-    
+        raise HTTPException(
+            status_code=404, detail=f"Item not found with query: {query}")
+
     clean_list = cleanup_tags(dirty_list)
     return clean_list
-

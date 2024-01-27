@@ -106,7 +106,7 @@ def read_user_from_discord_id(discord_id):
         raise HTTPException(status_code=404, detail="user not found")
 
     cursor.close()
-    return {"id":user[0], "discord_id": user[1], "username": user[2], "is_admin": user[3], "email": user[4]}
+    return {"id": user[0], "discord_id": user[1], "username": user[2], "is_admin": user[3], "email": user[4]}
 
 
 def get_traits(_ids: list[int] = []):
@@ -244,23 +244,23 @@ def read_creature(creature_id):
     except:
         query = f'''SELECT id, name, level, body, mind, soul, arcana, charm, crafting, thieving, nature, medicine, traits, spells, items, notes 
             from creatures WHERE name="{str(creature_id)}"'''
-        
+
     creature = read_one(query, cursor)
 
     query = f"SELECT name FROM creature_types WHERE creature_id={creature[0]}"
     types = read_list(query, cursor)
 
     # huh so this cant work since all the items are words not id values
-    # traits = get_traits([int(a) for a in creature[12].split(', ')]) 
+    # traits = get_traits([int(a) for a in creature[12].split(', ')])
     # spells = get_spells([int(a) for a in creature[13].split(', ')])
     # items = get_items([int(a) for a in creature[14].split(', ')])
 
     cursor.close()
     conn.close()
     return {
-        "id": creature[0], "name": creature[1], "level": creature[2], 
-        "body": creature[3], "mind": creature[4], "soul": creature[5], 
-        "arcana": creature[6],"charm": creature[7],"crafting": creature[8],"thieving": creature[9],"nature": creature[10],"medicine": creature[11],
-        "traits": creature[12].split(', '),"spells": creature[13].split(', '),"items": creature[14].split(', '),
-        "notes": creature[15],"tags": types
-            }
+        "id": creature[0], "name": creature[1], "level": creature[2],
+        "body": creature[3], "mind": creature[4], "soul": creature[5],
+        "arcana": creature[6], "charm": creature[7], "crafting": creature[8], "thieving": creature[9], "nature": creature[10], "medicine": creature[11],
+        "traits": creature[12].split(', '), "spells": creature[13].split(', '), "items": creature[14].split(', '),
+        "notes": creature[15], "tags": types
+    }
