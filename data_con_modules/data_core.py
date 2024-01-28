@@ -6,7 +6,6 @@ from settings import get_settings
 
 def get_db_config():
     settings = get_settings()
-    print("ere")
 
     db_config = {"host": settings.database_host, "user": settings.database_user,
                 "passwd": settings.database_password, "db": settings.database_name}

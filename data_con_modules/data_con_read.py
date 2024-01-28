@@ -75,17 +75,10 @@ def read_one(query, conn, ignore_missing=False):
     return item
 
 
-<<<<<<< HEAD
 def read_list(query, conn, ignore_missing=False):
     dirty_list = do_query(query, conn)
     if dirty_list == -1: # check error
         return -1
-=======
-def read_list(query, cursor, ignore_missing=False):
-    print(query)
-    cursor.execute(query)
-    dirty_list = cursor.fetchall()
->>>>>>> 2bbdead0f6d9bc67e61789152c0b90f1139510da
 
     if dirty_list is None and not ignore_missing:
         raise HTTPException(
