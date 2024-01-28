@@ -4,7 +4,7 @@ from models import Object, Item, Trait, Spell, DBUser, Creature
 from data_con_modules.data_core import conn
 from data_con_modules.data_con_create import create_obj, create_item, create_spell, create_trait, create_creature
 
-from data_con_modules.data_core import db_config
+from data_con_modules.data_core import get_db_config
 
 #######################################################################
 ########################## Creation Commands ##########################
@@ -12,7 +12,7 @@ from data_con_modules.data_core import db_config
 
 
 def create(obj, _id: int = None):
-    conn = MySQLdb.connect(**db_config)
+    conn = MySQLdb.connect(**get_db_config())
     # cursor = conn.cursor()
     print("Start Creation")
 

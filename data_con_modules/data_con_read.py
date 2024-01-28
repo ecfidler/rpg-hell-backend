@@ -1,9 +1,6 @@
 from fastapi import HTTPException
 
-<<<<<<< HEAD
 from data_con_modules.data_core import do_query, do_query_one
-=======
->>>>>>> 2bbdead0f6d9bc67e61789152c0b90f1139510da
 
 def cleanup_tags(tags):
     t = []

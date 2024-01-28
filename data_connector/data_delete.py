@@ -3,7 +3,7 @@ from data_con_modules.data_con_del import delete_core
 
 from data_connector.data_read import read_object, read_spell, read_user_from_discord_id, read_creature
 
-from data_con_modules.data_core import db_config
+from data_con_modules.data_core import get_db_config
 #######################################################################
 ########################### Delete Commands ###########################
 #######################################################################
@@ -12,7 +12,7 @@ from data_con_modules.data_core import db_config
 def delete_item(item):
     item_id = read_object(item)["id"]
 
-    conn = MySQLdb.connect(**db_config)
+    conn = MySQLdb.connect(**get_db_config())
     
     print("Del item tags")
     dl = delete_core(item_id, "item_tags", conn)

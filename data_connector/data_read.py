@@ -3,7 +3,7 @@ import MySQLdb
 from data_con_modules.data_con_read import read_one, read_list, cleanup_search, cleanup_tags_req
 from fastapi import HTTPException
 
-from data_con_modules.data_core import db_config, do_query
+from data_con_modules.data_core import get_db_config, do_query
 
 #######################################################################
 ############################ Read Commands ############################
@@ -11,7 +11,7 @@ from data_con_modules.data_core import db_config, do_query
 
 
 def read_object(object_id):
-    conn = MySQLdb.connect(**db_config)
+    conn = MySQLdb.connect(**get_db_config())
 
     try:
 
@@ -60,7 +60,7 @@ def read_object(object_id):
 
 
 def read_spell(spell_quiry):
-    conn = MySQLdb.connect(**db_config)
+    conn = MySQLdb.connect(**get_db_config())
     try:
         try:
             query = f"SELECT id, name, effect, dice, level FROM spells WHERE id={int(spell_quiry)}"
@@ -80,7 +80,7 @@ def read_spell(spell_quiry):
 
 
 def read_user_from_name(user_name):
-    conn = MySQLdb.connect(**db_config)
+    conn = MySQLdb.connect(**get_db_config())
     cursor = conn.cursor()
     query = f'SELECT discord_id, name, is_admin, email FROM users WHERE name="{str(user_name).lower()}"'
 
@@ -95,7 +95,7 @@ def read_user_from_name(user_name):
 
 
 def read_user_from_discord_id(discord_id):
-    conn = MySQLdb.connect(**db_config)
+    conn = MySQLdb.connect(**get_db_config())
     cursor = conn.cursor()
     query = f'SELECT id, discord_id, name, is_admin, email FROM users WHERE discord_id="{str(discord_id)}"'
 
@@ -113,7 +113,7 @@ def get_traits(_ids: list[int] = []):
     """
     Returns all traits
     """
-    conn = MySQLdb.connect(**db_config)
+    conn = MySQLdb.connect(**get_db_config())
     try:
         query = f"SELECT objects.id, objects.name, objects.effect, traits.dice, traits.is_passive FROM objects INNER JOIN traits ON objects.id=traits.id"
 
@@ -144,7 +144,7 @@ def get_items(_ids: list[int] = []):
     """
     Returns all items
     """
-    conn = MySQLdb.connect(**db_config)
+    conn = MySQLdb.connect(**get_db_config())
     try:
         query = f"SELECT objects.id, objects.name, objects.effect, items.cost, items.craft FROM objects, items WHERE objects.id=items.id"
 
@@ -184,7 +184,7 @@ def get_spells(_ids: list[int] = []):
     """
     Returns all spells
     """
-    conn = MySQLdb.connect(**db_config)
+    conn = MySQLdb.connect(**get_db_config())
     try:
 
         query = f"SELECT id, name, effect, dice, level FROM spells"
@@ -214,7 +214,7 @@ def get_spells(_ids: list[int] = []):
 
 
 def get_users(_ids: list[int] = []):
-    conn = MySQLdb.connect(**db_config)
+    conn = MySQLdb.connect(**get_db_config())
     cursor = conn.cursor()
     query = f"SELECT id, discord_id, name, is_admin, email FROM users"
 
@@ -236,7 +236,7 @@ def get_users(_ids: list[int] = []):
 
 
 def read_creature(creature_id):
-    conn = MySQLdb.connect(**db_config)
+    conn = MySQLdb.connect(**get_db_config())
     cursor = conn.cursor()
     try:
         query = f'''SELECT id, name, level, body, mind, soul, arcana, charm, crafting, thieving, nature, medicine, traits, spells, items, notes
