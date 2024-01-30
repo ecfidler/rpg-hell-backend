@@ -12,49 +12,40 @@ from data_con_modules.data_core import get_db_config, do_query
 
 def read_object(object_id):
     conn = MySQLdb.connect(**get_db_config())
-
     try:
-
-        try:
-            query = f"SELECT id, name, effect FROM objects WHERE id={int(object_id)}"
-        except:
-            query = f'SELECT id, name, effect FROM objects WHERE name="{str(object_id).lower()}"'
-
-        item = read_one(query,conn)
-        if item == -1:
-            raise Exception("main item broke")
-
-        query = f"SELECT type, value FROM requirements WHERE object_id={item[0]}"
-        req = read_list(query, ignore_missing=True)
-
-        info = {"id": item[0], "name": item[1], "effect": item[2], "req": req}
-
-        # traits
-        query = f"SELECT dice, is_passive FROM traits WHERE id={info['id']}"
-        trait_data = read_one(query, ignore_missing=True)
-        if trait_data == -1:
-            return -1
-
-        if trait_data != None:
-            info["dice"] = trait_data[0]
-            info["is_passive"] = trait_data[1]
-
-        # items
-        query = f"SELECT cost, craft FROM items WHERE id={info['id']}"
-        item_data = read_one(query, conn, ignore_missing=True)
-        if item_data != None:
-            info["cost"] = item_data[0]
-            info["craft"] = item_data[1]
-
-            query = f"SELECT name, value FROM item_tags WHERE item_id={info['id']}"
-            tags = read_list(query, conn)
-            info["tags"] = tags
-
-        conn.close()
-        return info
+        query = f"SELECT id, name, effect FROM objects WHERE id={int(object_id)}"
     except:
-        conn.close()
-        return -1
+        query = f'SELECT id, name, effect FROM objects WHERE name="{str(object_id).lower()}"'
+
+    item = read_one(query,conn)
+
+    query = f"SELECT type, value FROM requirements WHERE object_id={item[0]}"
+    req = read_list(query, conn, ignore_missing=True)
+
+    info = {"id": item[0], "name": item[1], "effect": item[2], "req": req}
+
+    # traits
+    query = f"SELECT dice, is_passive FROM traits WHERE id={info['id']}"
+    trait_data = read_one(query, conn, ignore_missing=True)
+
+    if trait_data != None:
+        info["dice"] = trait_data[0]
+        info["is_passive"] = trait_data[1]
+
+    # items
+    query = f"SELECT cost, craft FROM items WHERE id={info['id']}"
+    item_data = read_one(query, conn, ignore_missing=True)
+
+    if item_data != None:
+        info["cost"] = item_data[0]
+        info["craft"] = item_data[1]
+
+        query = f"SELECT name, value FROM item_tags WHERE item_id={info['id']}"
+        tags = read_list(query, conn)
+        info["tags"] = tags
+
+    conn.close()
+    return info
     
     
 
@@ -62,21 +53,17 @@ def read_object(object_id):
 def read_spell(spell_quiry):
     conn = MySQLdb.connect(**get_db_config())
     try:
-        try:
-            query = f"SELECT id, name, effect, dice, level FROM spells WHERE id={int(spell_quiry)}"
-        except:
-            query = f'SELECT id, name, effect, dice, level FROM spells WHERE name="{str(spell_quiry).lower()}"'
-
-        spell = read_one(query, conn)
-
-        query = f"SELECT name FROM spell_tags WHERE spell_id={spell[0]}"
-        tags = read_list(query, conn)
-
-        conn.close()
-        return {"id": spell[0], "name": spell[1], "effect": spell[2], "dice": spell[3], "level": spell[4], "tags": tags}
+        query = f"SELECT id, name, effect, dice, level FROM spells WHERE id={int(spell_quiry)}"
     except:
-        conn.close()
-        return -1
+        query = f'SELECT id, name, effect, dice, level FROM spells WHERE name="{str(spell_quiry).lower()}"'
+
+    spell = read_one(query, conn)
+
+    query = f"SELECT name FROM spell_tags WHERE spell_id={spell[0]}"
+    tags = read_list(query, conn)
+
+    conn.close()
+    return {"id": spell[0], "name": spell[1], "effect": spell[2], "dice": spell[3], "level": spell[4], "tags": tags}
 
 
 def read_user_from_name(user_name):

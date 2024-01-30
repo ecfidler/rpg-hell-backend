@@ -28,14 +28,16 @@ async def get_all_traits():
     return get_all()
 
 
-@traits_router.patch("/trait/{id}", dependencies=[Depends(auth.admin)])
-async def update_trait(id: int, trait: Trait):
-    return JSONResponse(content={"data": update_trait(id, trait)}, status_code=status.HTTP_200_OK)
+@traits_router.patch("/trait/{name}", dependencies=[Depends(auth.admin)])
+async def update_trait(name: str, trait: Trait):
+    return JSONResponse(content={"data": update_trait(name, trait)}, status_code=status.HTTP_200_OK)
 
 
 @traits_router.delete("/trait/{id}", dependencies=[Depends(auth.admin)])
 async def delete_trait(id: int):
-    return JSONResponse(content={"data": delete_trait(id)}, status_code=status.HTTP_200_OK)
+    data = delete_trait(id)
+    print(data)
+    return JSONResponse(content={"data": data}, status_code=status.HTTP_200_OK)
 
 
 @traits_router.get("/filtertraits/", response_model=dict[int, Trait])

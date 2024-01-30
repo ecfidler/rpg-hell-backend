@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     database_name: str
     jwt_secret: str
     mode: str
+    secret_password: str
 
     class Config:
         env_file = '.env'

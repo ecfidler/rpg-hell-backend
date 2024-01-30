@@ -30,9 +30,9 @@ async def get_spell_by_id(id: Annotated[int, Path(title="The ID of the spell to 
     return get_spell(id)
 
 
-@spells_router.patch("/spell/{id}", dependencies=[Depends(auth.admin)])
-async def update_spell(id: int, spell: Spell):
-    return JSONResponse(content={"data": update_spell(id, spell)}, status_code=status.HTTP_200_OK)
+@spells_router.patch("/spell/{name}", dependencies=[Depends(auth.admin)])
+async def update_spell(name: str, spell: Spell):
+    return JSONResponse(content={"data": update_spell(name, spell)}, status_code=status.HTTP_200_OK)
 
 
 @spells_router.delete("/spell/{id}", dependencies=[Depends(auth.admin)])

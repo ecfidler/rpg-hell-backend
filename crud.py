@@ -80,7 +80,8 @@ def update_trait(id: int, new_trait: Trait):
 
 
 def delete_trait(id: int):
-    return delete.delete_trait(id)
+    data = delete.delete_trait(id)
+    return data
 
 
 def filter_trait(requirements: str):

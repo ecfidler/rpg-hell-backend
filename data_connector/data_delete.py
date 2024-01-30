@@ -15,93 +15,88 @@ def delete_item(item):
     conn = MySQLdb.connect(**get_db_config())
     
     print("Del item tags")
-    dl = delete_core(item_id, "item_tags", conn)
-    if dl == -1:
-        return -1
+    delete_core(item_id, "item_tags", conn)
 
     print("Del item")
     delete_core(item_id, "items",conn)
-    if dl == -1:
-        return -1
 
     print("Del requirements")
     delete_core(item_id, "requirements",conn)
-    if dl == -1:
-        return -1
     
     print("Del object")
-    delete_core(item_id, "objects")
-    if dl == -1:
-        return -1
+    delete_core(item_id, "objects", conn)
 
     print(f"Deleated {item} from database")
+
+    conn.close()
     
     return {"id": item_id}
 
 
 def delete_trait(trait):
-    item_id = read_object(trait)["id"]
+    print(trait)
+    trait_id = read_object(trait)["id"]
 
+    conn = MySQLdb.connect(**get_db_config())
 
     print("Del traits")
-    dl = delete_core(item_id, "traits")
-    if dl == -1:
-        return -1
+    delete_core(trait_id, "traits",conn)
     
     print("Del requirements")
-    delete_core(item_id, "requirements")
-    if dl == -1:
-        return -1
+    delete_core(trait_id, "requirements",conn)
     
     print("Del object")
-    delete_core(item_id, "objects")
-    if dl == -1:
-        return -1
+    delete_core(trait_id, "objects",conn)
 
     print(f"Deleated {trait} from database")
 
-    return {"id": item_id}
+    conn.close()
+
+    return {"id": trait_id}
 
 
 def delete_spell(spell):
     item_id = read_spell(spell)["id"]
 
+    conn = MySQLdb.connect(**get_db_config())
+
     print("Del spell tags")
-    dl = delete_core(item_id, "spell_tags")
-    if dl == -1:
-        return -1
+    delete_core(item_id, "spell_tags",conn)
     
     print("Del spell")
-    dl = delete_core(item_id, "spells")
-    if dl == -1:
-        return -1
+    delete_core(item_id, "spells",conn)
 
     print(f"Deleated {spell} from database")
+
+    conn.close()
     return {"id": item_id}
 
 
 def delete_user(user_id):
     item_id = read_user_from_discord_id(user_id)["id"]
+
+    conn = MySQLdb.connect(**get_db_config())
     
     print("Del user")
-    dl = delete_core(item_id, "users")
-    if dl == -1:
-        return -1
+    dl = delete_core(item_id, "users",conn)
+
     print(f"Deleated {user_id} from database")
+
+    conn.close()
 
     return {"id": item_id}
 
 
 def delete_creature(creature):
     item_id = read_creature(creature)["id"]
+
+    conn = MySQLdb.connect(**get_db_config())
     
     print("Del creature types")
-    dl = delete_core(item_id, "creature_types")
+    delete_core(item_id, "creature_types",conn)
     print("Del creature")
-    dl = delete_core(item_id, "creatures")
-
-    if dl == -1:
-        raise Exception("Del creature error")
+    delete_core(item_id, "creatures",conn)
         
     print(f"Deleated {creature} from database")
+    conn.close()
     return {"id": item_id}

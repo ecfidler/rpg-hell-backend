@@ -8,21 +8,36 @@ from models import Creature, Trait, Item, Spell, DBUser
 ########################### Update Commands ###########################
 #######################################################################
 
+def update_trait(name: str, trait: Trait):
+    id = delete_trait(name)["id"]
+    return create(trait, id)
 
 def update_trait(id: int, trait: Trait):
     delete_trait(id)
     return create(trait, id)
 
 
+def update_item(name: str, item: Item):
+    id = delete_item(name)["id"]
+    return create(item, id)
+
 def update_item(id: int, item: Item):
     delete_item(id)
     return create(item, id)
 
 
+def update_spell(name: str, spell: Spell):
+    id = delete_spell(name)["id"]
+    return create(spell, id)
+
 def update_spell(id: int, spell: Spell):
     delete_spell(id)
     return create(spell, id)
 
+
+def update_creature(name: str, creature: Creature):
+    id = delete_creature(name)["id"]
+    return create(creature, id)
 
 def update_creature(id: int, creature: Creature):
     delete_creature(id)

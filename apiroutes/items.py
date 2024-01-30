@@ -29,9 +29,9 @@ async def get_all_items():
     return get_all()
 
 
-@items_router.patch("/item/{id}", dependencies=[Depends(auth.admin)])
-async def update_item(id: int, item: Item):
-    return JSONResponse(content={"data": update_item(id, item)}, status_code=status.HTTP_200_OK)
+@items_router.patch("/item/{name}", dependencies=[Depends(auth.admin)])
+async def update_item(name: str, item: Item):
+    return JSONResponse(content={"data": update_item(name, item)}, status_code=status.HTTP_200_OK)
 
 
 @items_router.delete("/item/{id}", dependencies=[Depends(auth.admin)])

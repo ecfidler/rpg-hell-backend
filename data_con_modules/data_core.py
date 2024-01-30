@@ -16,8 +16,8 @@ def get_db_config():
 # Create a connection to the database
 conn = MySQLdb.connect(**get_db_config())
 
-logging.basicConfig(filename='./logs/query.log', encoding='utf-8', level=logging.DEBUG)
-logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+logging.basicConfig(filename='./logs/query.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s:%(levelname)s:%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
 #######################################################################
 ############################## Mysc Tools #############################
 #######################################################################

@@ -15,8 +15,6 @@ def delete_core(id: int, loc: str, conn):
 
     query = f"DELETE FROM {loc} WHERE {id_types[loc]}={id}"
     # print(query)
-    qItem = do_query(query,conn)
-    if qItem == -1: # check error
-        return -1
-    return 1
+    do_query(query,conn)
+    return id
 
