@@ -1,20 +1,40 @@
+import MySQLdb
+from data_con_modules.data_con_create import add_requirements
+from data_con_modules.data_con_del import delete_core
+from data_con_modules.data_con_read import read_one
 from data_connector.data_delete import delete_trait, delete_item, delete_spell, delete_user, delete_creature
 from data_connector.data_create import create, create_user
 from data_con_modules.data_core import conn
 
+from data_con_modules.data_con_update import update_trait_module
+
 from models import Creature, Trait, Item, Spell, DBUser
+
+from data_con_modules.data_core import get_db_config, do_query
 
 #######################################################################
 ########################### Update Commands ###########################
 #######################################################################
 
-def update_trait(name: str, trait: Trait):
-    id = delete_trait(name)["id"]
-    return create(trait, id)
+def update_trait_conn(name: str, trait: Trait):
+    conn = MySQLdb.connect(**get_db_config())
+    try:
+        trait_id = read_one(f'SELECT id, name FROM objects WHERE name="{str(name).lower()}"',conn)[0]
+        trait.id = trait_id
 
-def update_trait(id: int, trait: Trait):
-    delete_trait(id)
-    return create(trait, id)
+        do_query(f'UPDATE objects SET name="{trait.name}", effect="{trait.effect}" WHERE id={trait_id}',conn)
+        do_query(f'UPDATE traits SET dice={trait.dice}, is_passive={trait.is_passive} WHERE id={trait_id}',conn)
+
+        delete_core(trait.id, "requirements",conn)
+        add_requirements(trait, conn)
+
+        conn.commit()
+        data = {"id":trait.id}
+    except Exception as e:
+        data = {"Error": e}
+        conn.rollback()
+    conn.close()
+    return data
 
 
 def update_item(name: str, item: Item):

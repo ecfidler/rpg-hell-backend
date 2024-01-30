@@ -33,13 +33,9 @@ def create_obj(obj, conn,  _id: int = 0):
     print(query)
 
     qItem = do_query_lastID(query,conn)
-    if qItem == -1: # check error
-        return -1
     
     obj.id = qItem  # needed in order to have an id for the next step
     qItem = add_requirements(obj, conn)
-    if qItem == -1:
-        return -1
     
     return obj
 
@@ -82,8 +78,6 @@ def create_trait(obj: Trait, conn, _id: int = 0):
     create_obj(obj, conn, _id)
     query = f"INSERT INTO traits (id, dice, is_passive) VALUES ({obj.id},{obj.dice},{obj.is_passive})"
     qItem = do_query(query,conn)
-    if qItem == -1: # check error
-        return -1
     return obj
 
 

@@ -75,8 +75,8 @@ def get_all_traits():
     return dict(zip(ids, traits))
 
 
-def update_trait(id: int, new_trait: Trait):
-    return update.update_trait(int, new_trait)
+def update_trait_crud(name: str, new_trait: Trait):
+    return update.update_trait_conn(name, new_trait)
 
 
 def delete_trait(id: int):

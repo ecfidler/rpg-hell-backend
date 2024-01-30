@@ -4,7 +4,7 @@ import apiroutes.auth as auth
 
 from typing import Annotated
 
-from crud import create_trait, get_all_traits as get_all, update_trait, delete_trait, filter_trait
+from crud import create_trait, get_all_traits as get_all, update_trait_crud, delete_trait, filter_trait
 
 from models import Trait
 
@@ -30,7 +30,7 @@ async def get_all_traits():
 
 @traits_router.patch("/trait/{name}", dependencies=[Depends(auth.admin)])
 async def update_trait(name: str, trait: Trait):
-    return JSONResponse(content={"data": update_trait(name, trait)}, status_code=status.HTTP_200_OK)
+    return JSONResponse(content={"data": update_trait_crud(name, trait)}, status_code=status.HTTP_200_OK)
 
 
 @traits_router.delete("/trait/{id}", dependencies=[Depends(auth.admin)])

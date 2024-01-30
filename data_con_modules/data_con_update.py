@@ -1,6 +1,7 @@
+from data_con_modules.data_con_read import read_one
 from data_con_modules.data_core import do_query
+from data_connector.data_read import read_object
 from models import Item, Trait, Spell
-from data_con_modules.data_con_read import read_object
 
 #######################################################################
 ########################### Update Commands ###########################
@@ -26,16 +27,15 @@ def update_item(item, update_item: Item,conn):
     return {"id": item_id}
 
 
-def update_trait(trait, update_trait: Trait,conn):
-    trait_id = read_object(trait)["id"]
+def update_trait_module(name:str , _update_trait: Trait, conn):
+    trait_id = read_one(f'SELECT id, name FROM objects WHERE name="{str(name).lower()}"',conn)[0]
+    _update_trait.id = trait_id
 
-    qItem = do_query(f"UPDATE objects SET name={update_trait.name}, effect={update_trait.effect} WHERE id={trait_id}",conn)
-    if qItem == -1: # check error
-        return -1
+    do_query(f'UPDATE objects SET name="{_update_trait.name}", effect="{_update_trait.effect}" WHERE id={trait_id}',conn)
+    do_query(f'UPDATE traits SET dice={_update_trait.dice}, is_passive={_update_trait.is_passive} WHERE id={trait_id}',conn)
 
-    qItem = do_query(f"UPDATE traits SET dice={update_trait.dice}, is_passive={update_trait.is_passive} WHERE id={trait_id}",conn)
-    if qItem == -1: # check error
-        return -1
+    
+    
     
     # TODO: Somehow we need to do requirements down here
 
