@@ -79,8 +79,8 @@ def update_trait_crud(name: str, new_trait: Trait):
     return update.update_trait_conn(name, new_trait)
 
 
-def delete_trait(id: int):
-    data = delete.delete_trait(id)
+def delete_trait_crud(id: int):
+    data = delete.delete_trait_conn(id)
     return data
 
 

@@ -33,26 +33,30 @@ def delete_item(item):
     return {"id": item_id}
 
 
-def delete_trait(trait):
-    print(trait)
-    trait_id = read_object(trait)["id"]
-
+def delete_trait_conn(trait_id):
     conn = MySQLdb.connect(**get_db_config())
 
-    print("Del traits")
-    delete_core(trait_id, "traits",conn)
-    
-    print("Del requirements")
-    delete_core(trait_id, "requirements",conn)
-    
-    print("Del object")
-    delete_core(trait_id, "objects",conn)
+    try:
+        print("Del traits")
+        delete_core(trait_id, "traits",conn)
+        
+        print("Del requirements")
+        delete_core(trait_id, "requirements",conn)
+        
+        print("Del object")
+        delete_core(trait_id, "objects",conn)
 
-    print(f"Deleated {trait} from database")
+        print(f"Deleated {trait_id} from database")
+        data = {"id": trait_id}
+
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        data = {"Error":e}
 
     conn.close()
 
-    return {"id": trait_id}
+    return data
 
 
 def delete_spell(spell):

@@ -2,7 +2,7 @@ import MySQLdb
 from data_con_modules.data_con_create import add_requirements
 from data_con_modules.data_con_del import delete_core
 from data_con_modules.data_con_read import read_one
-from data_connector.data_delete import delete_trait, delete_item, delete_spell, delete_user, delete_creature
+from data_connector.data_delete import delete_item, delete_spell, delete_user, delete_creature
 from data_connector.data_create import create, create_user
 from data_con_modules.data_core import conn
 
