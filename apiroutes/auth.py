@@ -37,7 +37,7 @@ async def discord_credentials(request: Request):
     # if auth_token is None or await discord.isAuthenticated(auth_token) == False:
     #     raise Unauthorized
     # return User(**(await discord.request("/users/@me", auth_token)))
-    if (settings.secret_password):
+    if (settings.secret_password != "no"):
         return "275002179763306517"
     return "1"
 
