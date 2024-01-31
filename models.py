@@ -4,7 +4,7 @@ from pydantic import BaseModel
 class Object(BaseModel):
     id: int = 0
     name: str
-    effect: str = None
+    effect: str
     req: list[str] = []
 
     # def __init__(self, _name: str, _effect: str, _req=[]):
@@ -47,7 +47,7 @@ class Trait(Object):
 class Item(Object):
     cost: int = 0
     craft: int = 0
-    tags: list[str] = []
+    tags: list[str]
     # def __init__(self, _name: str, _effect: str, _cost: int, _craft: int, _tags, _req=[]):
     #     self.name = str(_name).lower()
     #     self.effect = str(_effect)
@@ -65,10 +65,10 @@ class Item(Object):
 class Spell(BaseModel):
     id: int = 0
     name: str
-    effect: str = None
+    effect: str
     dice: int = 0
     level: int = 0
-    tags: list[str] = []
+    tags: list[str]
 
     # def __init__(self, _name: str, _effect: str, _dice: int, _level: int, _tags):
     #     self.name = str(_name).lower()
