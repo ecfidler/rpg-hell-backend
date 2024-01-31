@@ -31,13 +31,13 @@ redirect = "https://quiltic.github.io/rpg-hell-frontend/callback" if settings.mo
 
 async def discord_credentials(request: Request):
     # auth_token = request.cookies.get("discord_access_token")
-    auth_token = request.cookies.get("db_access")
+    # auth_token = request.cookies.get("db_access")
 
-    logging.debug(auth_token)
+    # logging.debug(auth_token)
     # if auth_token is None or await discord.isAuthenticated(auth_token) == False:
     #     raise Unauthorized
     # return User(**(await discord.request("/users/@me", auth_token)))
-    if (auth_token == settings.secret_password):
+    if (settings.secret_password):
         return "275002179763306517"
     return "1"
 
