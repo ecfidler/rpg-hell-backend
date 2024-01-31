@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     jwt_secret: str
     mode: str
     secret_password: str
+    ssl_cert_path: str
+    ssl_key_path: str
 
     class Config:
         env_file = '.env'

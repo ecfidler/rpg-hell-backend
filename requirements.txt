@@ -1,5 +1,6 @@
 fastapi
 uvicorn
+uvicorn[standard]
 gunicorn
 pydantic
 pydantic_settings
@@ -7,3 +8,4 @@ python-dotenv
 mysqlclient
 fastapi-discord
 aiofiles
+cryptography

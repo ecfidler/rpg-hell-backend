@@ -5,6 +5,10 @@ from fastapi.responses import JSONResponse, RedirectResponse
 
 from fastapi_discord import Unauthorized
 
+from settings import get_settings
+
+import ssl
+
 
 import crud
 # from models import Trait, Item, Spell
@@ -48,9 +52,16 @@ tags = [
 ]
 
 
+settings = get_settings()
+
+
 def custom_generate_unique_id(route: APIRoute):
     return f"{route.tags[0]}-{route.name}"
 
+
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+ssl_context.load_cert_chain(settings.ssl_cert_path,
+                            keyfile=settings.ssl_key_path)
 
 app = FastAPI(title="RPG Hell API",
               description="API for managing all of the data that exists in the RPG Hell tabletop game",
