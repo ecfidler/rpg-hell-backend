@@ -138,3 +138,14 @@ async def get_or_create_database_user(user: User = Depends(discord_credentials))
         DBUser(discord_id=user.id, username=user.username, email=user.email))
     res["avatar_url"] = user.avatar_url
     return res
+
+
+@auth_router.get("/auth/cookie")
+async def cookie(code: str):
+
+    response = Response(content="as", status_code=status.HTTP_202_ACCEPTED)
+
+    response.set_cookie(key="cookie_thing", value=code)
+
+    print(response)
+    return response
