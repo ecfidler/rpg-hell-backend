@@ -52,7 +52,7 @@ def update_spell_conn(name: str, spell: Spell):
         spell_id = read_one(f'SELECT id, name FROM spells WHERE name="{str(name).lower()}"',conn)[0]
         spell.id = spell_id
 
-        do_query(f'UPDATE spells SET effect="{spell.effect}" dice={spell.dice}, level={spell.level} WHERE id={spell_id}',conn)
+        do_query(f'UPDATE spells SET effect="{spell.effect}", dice={spell.dice}, level={spell.level} WHERE id={spell_id}',conn)
 
         delete_core(spell.id, "spell_tags",conn)
         add_spell_tags(spell,conn)
