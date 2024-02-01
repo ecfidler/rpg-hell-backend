@@ -21,9 +21,6 @@ import certifi
 
 settings = get_settings()
 
-ssl_context = ssl.create_default_context(cafile=certifi.where())
-conn = aiohttp.TCPConnector(ssl=ssl_context)
-
 discord = DiscordOAuthClient(
     client_id=settings.discord_client_id,
     client_secret=settings.discord_client_secret,
@@ -34,6 +31,12 @@ discord = DiscordOAuthClient(
 auth_router = APIRouter(tags=["Users"])
 
 redirect = "https://quiltic.github.io/rpg-hell-frontend/callback" if settings.mode == "prod" else "http://localhost:5173/callback"
+
+
+async def init_discord(d: DiscordOAuthClient):
+    ssl_context = ssl.create_default_context(cafile=certifi.where())
+    conn = aiohttp.TCPConnector(ssl=ssl_context)
+    d.client_session = aiohttp.ClientSession(connector=conn)
 
 
 async def discord_credentials(request: Request):
@@ -67,8 +70,7 @@ async def admin(user: Annotated[User, Depends(discord_credentials)]):
 
 @auth_router.on_event("startup")
 async def on_startup():
-    discord.client_session = aiohttp.ClientSession(connector=conn)
-    await discord.init()
+    await init_discord(discord)
 
 
 @auth_router.get("/login")
