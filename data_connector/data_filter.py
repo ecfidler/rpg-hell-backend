@@ -1,7 +1,7 @@
 from data_con_modules.data_core import conn
 from data_con_modules.data_con_filter import get_filter_query,cleanup_filter
 
-from data_connector.data_read import get_traits, get_items, get_spells, get_users
+from data_connector.data_read import get_traits, get_items, get_spells_conn, get_users
 
 
 #######################################################################
@@ -61,7 +61,7 @@ def filter_items_by_tags(tags: list[str]):
 def filter_spells_by_tags(tags: list[str]):
     ids = filter_base("spells", [], tags)
     if len(ids):
-        data, ids = get_spells(ids)
+        data, ids = get_spells_conn(ids)
     else:
         return [], []
 

@@ -35,7 +35,7 @@ def object_search(name: str):
 
 
 def get_all_items():
-    items, ids = read.get_items()
+    items, ids = read.get_items_conn()
     return dict(zip(ids, items))
 
 
@@ -71,7 +71,7 @@ def create_trait(trait: Trait):
 
 
 def get_all_traits():
-    traits, ids = read.get_traits()
+    traits, ids = read.get_traits_conn()
     return dict(zip(ids, traits))
 
 
@@ -92,35 +92,35 @@ def filter_trait(requirements: str):
 # Spells
 
 
-def get_spell(id: int):
-    return read.read_spell(id)
+def get_spell_crud(id: int):
+    return read.read_spell_conn(id)
 
 
 # todo: add other search params & support returning multiple results
-def spell_search(name: str):
-    return read.read_spell(name)
+def spell_search_crud(name: str):
+    return read.read_spell_conn(name)
 
 
-def get_all_spells():
-    spells, ids = read.get_spells()
+def get_all_spells_crud():
+    spells, ids = read.get_spells_conn()
     return dict(zip(ids, spells))
 
 
-def create_spell(spell: Spell):
+def create_spell_crud(spell: Spell):
     return create.create(spell)
 
 
-def update_spell(id: int, new_spell: Spell):
-    return update.update_spell(id, new_spell)
+def update_spell_crud(id: int, new_spell: Spell):
+    return update.update_spell_conn(id, new_spell)
 
 
-def spell_delete(id):
-    return delete.delete_spell(id)
+def spell_delete_crud(id):
+    return delete.delete_spell_conn(id)
 
 
-def filter_spell(tags: str):
+def filter_spell_crud(tags: str):
     _tags = tags.split(',')
-    data, ids = filter.filter_spells_by_tags(_tags)
+    data, ids = filter.filter_spells_by_tags_conn(_tags)
     return dict(zip(ids, data))
 
 # Users

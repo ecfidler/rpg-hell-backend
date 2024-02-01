@@ -4,7 +4,7 @@ import apiroutes.auth as auth
 
 from typing import Annotated
 
-from crud import create_spell, get_all_spells as get_all, update_spell, spell_delete, spell_search as search, get_spell, filter_spell
+from crud import create_spell_crud, get_all_spells_crud as get_all, update_spell_crud, spell_delete_crud, spell_search_crud as search, get_spell_crud, filter_spell_crud
 
 from models import Spell
 
@@ -27,22 +27,22 @@ async def get_all_spells():
 @spells_router.get("/spell/{id}", response_model=Spell)
 async def get_spell_by_id(id: Annotated[int, Path(title="The ID of the spell to get")]):
     # return JSONResponse(content={"data": get_spell(id)}, status_code=status.HTTP_200_OK)
-    return get_spell(id)
+    return get_spell_crud(id)
 
 
 @spells_router.patch("/spell/{name}", dependencies=[Depends(auth.admin)])
 async def update_spell(name: str, spell: Spell):
-    return JSONResponse(content={"data": update_spell(name, spell)}, status_code=status.HTTP_200_OK)
+    return JSONResponse(content={"data": update_spell_crud(name, spell)}, status_code=status.HTTP_200_OK)
 
 
 @spells_router.delete("/spell/{id}", dependencies=[Depends(auth.admin)])
 async def delete_spell(id: int):
-    return JSONResponse(content={"data": spell_delete(id)}, status_code=status.HTTP_200_OK)
+    return JSONResponse(content={"data": spell_delete_crud(id)}, status_code=status.HTTP_200_OK)
 
 
 @spells_router.put("/spell/", tags=["Spells"], dependencies=[Depends(auth.admin)])
 async def put_spell(spell: Spell):
-    res = create_spell(spell)
+    res = create_spell_crud(spell)
     if (res == -1):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"it failed and we don't have proper error catching yet 😨")
@@ -53,4 +53,4 @@ async def put_spell(spell: Spell):
 @spells_router.get("/filterspells/", response_model=dict[int, Spell])
 async def filter_spells_by_tags(tags: Annotated[str, Query(description="csv")]):
     # return JSONResponse(content={"data": filter_spell(tags)}, status_code=status.HTTP_200_OK)
-    return filter_spell(tags)
+    return filter_spell_crud(tags)

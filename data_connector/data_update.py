@@ -1,8 +1,8 @@
 import MySQLdb
-from data_con_modules.data_con_create import add_requirements
+from data_con_modules.data_con_create import add_requirements, add_spell_tags
 from data_con_modules.data_con_del import delete_core
 from data_con_modules.data_con_read import read_one
-from data_connector.data_delete import delete_item, delete_spell, delete_user, delete_creature
+from data_connector.data_delete import delete_item, delete_spell_conn, delete_user, delete_creature
 from data_connector.data_create import create, create_user
 from data_con_modules.data_core import conn
 
@@ -22,7 +22,7 @@ def update_trait_conn(name: str, trait: Trait):
         trait_id = read_one(f'SELECT id, name FROM objects WHERE name="{str(name).lower()}"',conn)[0]
         trait.id = trait_id
 
-        do_query(f'UPDATE objects SET name="{trait.name}", effect="{trait.effect}" WHERE id={trait_id}',conn)
+        do_query(f'UPDATE objects SET effect="{trait.effect}" WHERE id={trait_id}',conn)
         do_query(f'UPDATE traits SET dice={trait.dice}, is_passive={trait.is_passive} WHERE id={trait_id}',conn)
 
         delete_core(trait.id, "requirements",conn)
@@ -46,13 +46,24 @@ def update_item(id: int, item: Item):
     return create(item, id)
 
 
-def update_spell(name: str, spell: Spell):
-    id = delete_spell(name)["id"]
-    return create(spell, id)
+def update_spell_conn(name: str, spell: Spell):
+    conn = MySQLdb.connect(**get_db_config())
+    try:
+        spell_id = read_one(f'SELECT id, name FROM spells WHERE name="{str(name).lower()}"',conn)[0]
+        spell.id = spell_id
 
-def update_spell(id: int, spell: Spell):
-    delete_spell(id)
-    return create(spell, id)
+        do_query(f'UPDATE spells SET effect="{spell.effect}" dice={spell.dice}, level={spell.level} WHERE id={spell_id}',conn)
+
+        delete_core(spell.id, "spell_tags",conn)
+        add_spell_tags(spell,conn)
+
+        conn.commit()
+        data = {"id":spell.id}
+    except Exception as e:
+        data = {"Error": e}
+        conn.rollback()
+    conn.close()
+    return data
 
 
 def update_creature(name: str, creature: Creature):

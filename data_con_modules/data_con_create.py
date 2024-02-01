@@ -102,14 +102,10 @@ def create_spell(obj: Spell, conn, _id: int = 0):
 
 
     qItem = do_query_lastID(query, conn)
-    if qItem == -1: # check error
-        return -1
     
     obj.id = qItem  # needed in order to have an id for the next step
     
     qItem = add_spell_tags(obj,conn)
-    if qItem == -1:
-        return -1
     
     return obj
 

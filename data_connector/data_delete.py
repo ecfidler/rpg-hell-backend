@@ -1,7 +1,7 @@
 import MySQLdb
 from data_con_modules.data_con_del import delete_core
 
-from data_connector.data_read import read_object, read_spell, read_user_from_discord_id, read_creature
+from data_connector.data_read import read_object, read_spell_conn, read_user_from_discord_id, read_creature
 
 from data_con_modules.data_core import get_db_config
 #######################################################################
@@ -59,21 +59,28 @@ def delete_trait_conn(trait_id):
     return data
 
 
-def delete_spell(spell):
-    item_id = read_spell(spell)["id"]
+def delete_spell_conn(spell):
+    spell_id = read_spell_conn(spell)["id"]
 
     conn = MySQLdb.connect(**get_db_config())
 
-    print("Del spell tags")
-    delete_core(item_id, "spell_tags",conn)
-    
-    print("Del spell")
-    delete_core(item_id, "spells",conn)
+    try:
+        print("Del spell tags")
+        delete_core(spell_id, "spell_tags",conn)
+        
+        print("Del spell")
+        delete_core(spell_id, "spells",conn)
 
-    print(f"Deleated {spell} from database")
+        print(f"Deleated {spell} from database")
+
+        data = {"id": spell_id}
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        data = {"Error":e}
 
     conn.close()
-    return {"id": item_id}
+    return data
 
 
 def delete_user(user_id):

@@ -50,7 +50,7 @@ def read_object(object_id):
     
 
 
-def read_spell(spell_quiry):
+def read_spell_conn(spell_quiry):
     conn = MySQLdb.connect(**get_db_config())
     try:
         query = f"SELECT id, name, effect, dice, level FROM spells WHERE id={int(spell_quiry)}"
@@ -167,7 +167,7 @@ def get_items(_ids: list[int] = []):
         return -1
 
 
-def get_spells(_ids: list[int] = []):
+def get_spells_conn(_ids: list[int] = []):
     """
     Returns all spells
     """
