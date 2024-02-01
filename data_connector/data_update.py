@@ -1,8 +1,8 @@
 import MySQLdb
-from data_con_modules.data_con_create import add_requirements, add_spell_tags
+from data_con_modules.data_con_create import add_item_tags, add_requirements, add_spell_tags
 from data_con_modules.data_con_del import delete_core
 from data_con_modules.data_con_read import read_one
-from data_connector.data_delete import delete_item, delete_spell_conn, delete_user, delete_creature
+from data_connector.data_delete import delete_creature
 from data_connector.data_create import create, create_user
 from data_con_modules.data_core import conn
 
@@ -37,13 +37,28 @@ def update_trait_conn(name: str, trait: Trait):
     return data
 
 
-def update_item(name: str, item: Item):
-    id = delete_item(name)["id"]
-    return create(item, id)
+def update_item_conn(name: str, item: Item):
+    conn = MySQLdb.connect(**get_db_config())
+    try:
+        item_id = read_one(f'SELECT id, name FROM objects WHERE name="{str(name).lower()}"',conn)[0]
+        item.id = item_id
 
-def update_item(id: int, item: Item):
-    delete_item(id)
-    return create(item, id)
+        do_query(f'UPDATE objects SET effect="{item.effect}" WHERE id={item_id}',conn)
+        do_query(f'UPDATE item SET cost={item.cost}, craft={item.craft} WHERE id={item_id}',conn)
+
+        delete_core(item.id, "requirements",conn)
+        add_requirements(item, conn)
+
+        delete_core(item.id, "item_tags",conn)
+        add_item_tags(item, conn)
+
+        conn.commit()
+        data = {"id":item.id}
+    except Exception as e:
+        data = {"Error": e}
+        conn.rollback()
+    conn.close()
+    return data
 
 
 def update_spell_conn(name: str, spell: Spell):

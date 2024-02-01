@@ -96,7 +96,7 @@ def read_user_from_discord_id(discord_id):
     return {"id": user[0], "discord_id": user[1], "username": user[2], "is_admin": user[3], "email": user[4]}
 
 
-def get_traits(_ids: list[int] = []):
+def get_traits_conn(_ids: list[int] = []):
     """
     Returns all traits
     """
@@ -127,7 +127,7 @@ def get_traits(_ids: list[int] = []):
         return -1
 
 
-def get_items(_ids: list[int] = []):
+def get_items_conn(_ids: list[int] = []):
     """
     Returns all items
     """

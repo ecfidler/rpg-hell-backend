@@ -34,22 +34,22 @@ def object_search(name: str):
 # Items
 
 
-def get_all_items():
+def get_all_items_crud():
     items, ids = read.get_items_conn()
     return dict(zip(ids, items))
 
 
-def create_item(item: Item):
+def create_item_crud(item: Item):
     # item = Item(name, effect, cost, craft, spliter(tags), spliter(req))
     return create.create(item)
 
 
-def update_item(id: int, new_item: Item):
-    return update.update_item(id, new_item)
+def update_item_crud(id: int, new_item: Item):
+    return update.update_item_conn(id, new_item)
 
 
-def delete_item(id):
-    return delete.delete_item(id)
+def delete_item_crud(id):
+    return delete.delete_item_conn(id)
 
 
 def filter_item(filters: str, option: FilterOption):
@@ -66,7 +66,7 @@ def filter_item(filters: str, option: FilterOption):
 # Traits
 
 
-def create_trait(trait: Trait):
+def create_trait_crud(trait: Trait):
     return create.create(trait)
 
 

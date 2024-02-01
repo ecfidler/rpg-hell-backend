@@ -1,7 +1,7 @@
 from data_con_modules.data_core import conn
 from data_con_modules.data_con_filter import get_filter_query,cleanup_filter
 
-from data_connector.data_read import get_traits, get_items, get_spells_conn, get_users
+from data_connector.data_read import get_traits_conn, get_items_conn, get_spells_conn, get_users
 
 
 #######################################################################
@@ -31,7 +31,7 @@ def filter_base(loc: str, reqs: list[str] = [], tags: list[str] = []):
 def filter_traits_by_reqs(reqs: list[str]):
     ids = filter_base("traits", reqs)
     if len(ids):
-        data, ids = get_traits(ids)
+        data, ids = get_traits_conn(ids)
     else:
         return [], []
 
@@ -41,7 +41,7 @@ def filter_traits_by_reqs(reqs: list[str]):
 def filter_items_by_reqs(reqs: list[str]):
     ids = filter_base("items", reqs)
     if len(ids):
-        data, ids = get_items(ids)
+        data, ids = get_items_conn(ids)
     else:
         return [], []
 

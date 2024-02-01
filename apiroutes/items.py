@@ -5,7 +5,7 @@ import apiroutes.auth as auth
 
 from typing import Annotated
 
-from crud import create_item, get_all_items as get_all, update_item, delete_item, filter_item
+from crud import create_item_crud, get_all_items_crud as get_all, update_item_crud, delete_item_crud, filter_item
 
 from models import Item
 
@@ -16,7 +16,7 @@ items_router = APIRouter(tags=["Items"])
 
 @items_router.put("/item/", dependencies=[Depends(auth.admin)])
 async def put_item(item: Item):
-    res = create_item(item)
+    res = create_item_crud(item)
     if (res == -1):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"it failed and we don't have proper error catching yet 😨")
@@ -31,12 +31,12 @@ async def get_all_items():
 
 @items_router.patch("/item/{name}", dependencies=[Depends(auth.admin)])
 async def update_item(name: str, item: Item):
-    return JSONResponse(content={"data": update_item(name, item)}, status_code=status.HTTP_200_OK)
+    return JSONResponse(content={"data": update_item_crud(name, item)}, status_code=status.HTTP_200_OK)
 
 
 @items_router.delete("/item/{id}", dependencies=[Depends(auth.admin)])
 async def delete_item(id: int):
-    return JSONResponse(content={"data": delete_item(id)}, status_code=status.HTTP_200_OK)
+    return JSONResponse(content={"data": delete_item_crud(id)}, status_code=status.HTTP_200_OK)
 
 
 @items_router.get("/filteritems/{option}", response_model=dict[int, Item])

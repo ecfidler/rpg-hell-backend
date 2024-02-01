@@ -9,28 +9,35 @@ from data_con_modules.data_core import get_db_config
 #######################################################################
 
 
-def delete_item(item):
+def delete_item_conn(item):
     item_id = read_object(item)["id"]
 
     conn = MySQLdb.connect(**get_db_config())
-    
-    print("Del item tags")
-    delete_core(item_id, "item_tags", conn)
 
-    print("Del item")
-    delete_core(item_id, "items",conn)
+    try:
+        print("Del item tags")
+        delete_core(item_id, "item_tags", conn)
 
-    print("Del requirements")
-    delete_core(item_id, "requirements",conn)
-    
-    print("Del object")
-    delete_core(item_id, "objects", conn)
+        print("Del item")
+        delete_core(item_id, "items",conn)
 
-    print(f"Deleated {item} from database")
+        print("Del requirements")
+        delete_core(item_id, "requirements",conn)
+        
+        print("Del object")
+        delete_core(item_id, "objects", conn)
+
+        print(f"Deleated {item} from database")
+
+        data = {"id": item_id}
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        data = {"Error":e}
 
     conn.close()
+    return data
     
-    return {"id": item_id}
 
 
 def delete_trait_conn(trait_id):

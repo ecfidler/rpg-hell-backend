@@ -40,36 +40,40 @@ def create_obj(obj, conn,  _id: int = 0):
     return obj
 
 
+def add_item_tags(obj: Item, conn):
+    query = "INSERT INTO item_tags (item_id, name, value) VALUES "
+    for tag in obj.tags:
+        # print(tag)
+        if "damage" in tag:  # damage is backwards...
+            val, typ = tag.split(" ")
+        elif " " in tag:
+            t = tag.split(" ")
+            # print(t)
+            try:
+                typ, val = " ".join(t[:-1]), int(t[-1])
+            except:
+                typ = tag
+                val = 0
+            # print(typ)
+
+        else:
+            typ = tag
+            val = 0
+
+        query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
+    query = query[:-1]+";"  # required to do magic for later
+
+    do_query(query,conn)
+
 # Route to create an item
 # @app.post("/items/", response_model=Item)
 def create_item(obj: Item, conn, _id: int = 0): 
     create_obj(obj, conn, _id)
     if obj.tags != None:
-        query = f"INSERT INTO items (id, cost, craft) VALUES ({obj.id}, {obj.cost}, {obj.craft}); INSERT INTO item_tags (item_id, name, value) VALUES "
-        for tag in obj.tags:
-            # print(tag)
-            if "damage" in tag:  # damage is backwards...
-                val, typ = tag.split(" ")
-            elif " " in tag:
-                t = tag.split(" ")
-                # print(t)
-                try:
-                    typ, val = " ".join(t[:-1]), int(t[-1])
-                except:
-                    typ = tag
-                    val = 0
-                # print(typ)
+        query = f"INSERT INTO items (id, cost, craft) VALUES ({obj.id}, {obj.cost}, {obj.craft});"
+        do_query(query, conn)
 
-            else:
-                typ = tag
-                val = 0
-
-            query += f'({obj.id}, "{str(typ).lower()}", {int(val)}),'
-        query = query[:-1]+";"  # required to do magic for later
-
-        qItem = do_query(query, conn)
-        if qItem == -1: # check error
-            return -1
+        add_item_tags(obj,conn)
         
     return obj
 

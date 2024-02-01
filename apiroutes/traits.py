@@ -4,7 +4,7 @@ import apiroutes.auth as auth
 
 from typing import Annotated
 
-from crud import create_trait, get_all_traits as get_all, update_trait_crud, delete_trait_crud, filter_trait
+from crud import create_trait_crud, get_all_traits as get_all, update_trait_crud, delete_trait_crud, filter_trait
 
 from models import Trait
 
@@ -14,7 +14,7 @@ traits_router = APIRouter(tags=["Traits"])
 @traits_router.put("/trait/", dependencies=[Depends(auth.admin)])
 # Annotated[Trait, Query(title="The new trait to be added")]
 async def put_trait(trait: Trait):
-    res = create_trait(trait)
+    res = create_trait_crud(trait)
     if (res == -1):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"it failed and we don't have proper error catching yet 😨")
