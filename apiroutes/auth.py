@@ -30,7 +30,6 @@ discord = DiscordOAuthClient(
     redirect_uri=settings.discord_redirect_uri,
     scopes=("identify", "email"),  # , "guilds"
 )
-discord.client_session = aiohttp.ClientSession(connector=conn)
 
 auth_router = APIRouter(tags=["Users"])
 
@@ -68,6 +67,7 @@ async def admin(user: Annotated[User, Depends(discord_credentials)]):
 
 @auth_router.on_event("startup")
 async def on_startup():
+    discord.client_session = aiohttp.ClientSession(connector=conn)
     await discord.init()
 
 
