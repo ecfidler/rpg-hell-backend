@@ -14,15 +14,23 @@ from models import DBUser
 from settings import get_settings
 import logging
 
+import ssl
+import aiohttp
+import certifi
+
 
 settings = get_settings()
+
+ssl_context = ssl.create_default_context(cafile=certifi.where())
+conn = aiohttp.TCPConnector(ssl=ssl_context)
 
 discord = DiscordOAuthClient(
     client_id=settings.discord_client_id,
     client_secret=settings.discord_client_secret,
     redirect_uri=settings.discord_redirect_uri,
-    scopes=("identify", "email")  # , "guilds"
+    scopes=("identify", "email"),  # , "guilds"
 )
+discord.client_session = aiohttp.ClientSession(connector=conn)
 
 auth_router = APIRouter(tags=["Users"])
 
