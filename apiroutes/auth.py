@@ -40,16 +40,16 @@ async def init_discord(d: DiscordOAuthClient):
 
 
 async def discord_credentials(request: Request):
-    # auth_token = request.cookies.get("discord_access_token")
-    # auth_token = request.cookies.get("db_access")
+    auth_token = request.cookies.get("discord_access_token")
 
-    # logging.debug(auth_token)
-    # if auth_token is None or await discord.isAuthenticated(auth_token) == False:
-    #     raise Unauthorized
-    # return User(**(await discord.request("/users/@me", auth_token)))
-    if (settings.secret_password == settings.database_password):
-        return "275002179763306517"
-    return "1"
+    if auth_token is None or await discord.isAuthenticated(auth_token) == False:
+        raise Unauthorized
+    return User(**(await discord.request("/users/@me", auth_token)))
+
+    # auth_token = request.cookies.get("db_access")
+    # if (settings.secret_password == settings.database_password):
+    #     return "275002179763306517"
+    # return "1"
 
 
 async def refresh_credentials(request: Request):
@@ -60,9 +60,10 @@ async def refresh_credentials(request: Request):
 
 
 async def admin(user: Annotated[User, Depends(discord_credentials)]):
-    # is_user_admin = get_user(user.id).get("is_admin") # this is the actual logic
-    # if (user.id == "173839815400357888") or (user.id == "275002179763306517"):  # etan-josh
-    if (user == "275002179763306517"):  # etan-josh
+    is_user_admin = get_user(user.id).get(
+        "is_admin")  # this is the actual logic
+    if (user.id == "173839815400357888") or (user.id == "275002179763306517"):  # etan-josh
+        # if (user == "275002179763306517"):  # etan-josh
         return True
     else:
         raise Unauthorized
@@ -150,12 +151,12 @@ async def get_or_create_database_user(user: User = Depends(discord_credentials))
     return res
 
 
-@auth_router.get("/auth/cookie")
-async def cookie(code: str):
+# @auth_router.get("/auth/cookie")
+# async def cookie(code: str):
 
-    response = Response(content="as", status_code=status.HTTP_202_ACCEPTED)
+#     response = Response(content="as", status_code=status.HTTP_202_ACCEPTED)
 
-    response.set_cookie(key="cookie_thing", value=code)
+#     response.set_cookie(key="cookie_thing", value=code)
 
-    print(response)
-    return response
+#     print(response)
+#     return response
