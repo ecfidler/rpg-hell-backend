@@ -14,6 +14,8 @@ def cleanup_tags(tags):
 
 def tag_type(tag):
     try:
+        if "damage" in tag:  # damage is backwards...
+            return (tag[2], tag[1])
         return (tag[1], tag[2])
     except:
         return (tag[1],)

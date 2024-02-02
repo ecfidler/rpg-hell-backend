@@ -44,7 +44,7 @@ def update_item_conn(name: str, item: Item):
         item.id = item_id
 
         do_query(f'UPDATE objects SET effect="{item.effect}" WHERE id={item_id}',conn)
-        do_query(f'UPDATE item SET cost={item.cost}, craft={item.craft} WHERE id={item_id}',conn)
+        do_query(f'UPDATE items SET cost={item.cost}, craft={item.craft} WHERE id={item_id}',conn)
 
         delete_core(item.id, "requirements",conn)
         add_requirements(item, conn)

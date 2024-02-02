@@ -51,7 +51,7 @@ def filter_items_by_reqs(reqs: list[str]):
 def filter_items_by_tags(tags: list[str]):
     ids = filter_base("items", [], tags)
     if len(ids):
-        data, ids = get_items(ids)
+        data, ids = get_items_conn(ids)
     else:
         return [], []
 

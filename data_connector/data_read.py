@@ -132,39 +132,32 @@ def get_items_conn(_ids: list[int] = []):
     Returns all items
     """
     conn = MySQLdb.connect(**get_db_config())
-    try:
-        query = f"SELECT objects.id, objects.name, objects.effect, items.cost, items.craft FROM objects, items WHERE objects.id=items.id"
+    query = f"SELECT objects.id, objects.name, objects.effect, items.cost, items.craft FROM objects, items WHERE objects.id=items.id"
 
-        if len(_ids):
-            query += f" AND objects.id IN ({str(_ids)[1:-1]})"
+    if len(_ids):
+        query += f" AND objects.id IN ({str(_ids)[1:-1]})"
 
-        # print(query)
-        dirty = do_query(query,conn)
-        if dirty == -1:
-            return -1
+    # print(query)
+    dirty = do_query(query,conn)
+    
+    items, ids = cleanup_search(dirty, "items")
+
+    # remove the []
+    query = f"SELECT item_id, name, value FROM item_tags WHERE item_id IN ({str(ids)[1:-1]})"
+    dirty = do_query(query,conn)
+    
+    cleanup_tags_req(items, dirty, 'tags')
+
+    # remove the []
+    query = f"SELECT object_id, type, value FROM requirements WHERE object_id IN ({str(ids)[1:-1]})"
+    
+    tmpitm = do_query(query,conn)  # items may not have requirements
+    if len(tmpitm):
+        cleanup_tags_req(items, tmpitm, 'req')
+
+    conn.close()
+    return items, ids
         
-        items, ids = cleanup_search(dirty, "items")
-
-        # remove the []
-        query = f"SELECT item_id, name, value FROM item_tags WHERE item_id IN ({str(ids)[1:-1]})"
-        dirty = do_query(query,conn)
-        if dirty == -1:
-            return -1
-        
-        cleanup_tags_req(items, dirty, 'tags')
-
-        # remove the []
-        query = f"SELECT object_id, type, value FROM requirements WHERE object_id IN ({str(ids)[1:-1]})"
-        
-        tmpitm = do_query(query,conn)  # items may not have requirements
-        if len(tmpitm):
-            cleanup_tags_req(items, tmpitm, 'req')
-
-        conn.close()
-        return items, ids
-    except:
-        conn.close()
-        return -1
 
 
 def get_spells_conn(_ids: list[int] = []):
