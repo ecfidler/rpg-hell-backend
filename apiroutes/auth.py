@@ -96,6 +96,9 @@ async def callback(code: str):
 
     response = RedirectResponse(url=redirect)
 
+    response.set_cookie(key="bonus cookie",
+                        value="yum")
+
     response.set_cookie(key="discord_access_token",
                         value=token, httponly=True, secure=True)
     response.set_cookie(key="discord_refresh_token",
