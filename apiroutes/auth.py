@@ -1,6 +1,6 @@
 from os import name
 from typing import Annotated
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Cookie, Depends, Request, status
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi_discord import DiscordOAuthClient, Unauthorized, User
 
@@ -13,6 +13,8 @@ from models import DBUser
 
 from settings import get_settings
 import logging
+
+import datetime
 
 import ssl
 import aiohttp
@@ -30,7 +32,7 @@ discord = DiscordOAuthClient(
 
 auth_router = APIRouter(tags=["Users"])
 
-redirect = "https://quiltic.github.io/rpg-hell-frontend/callback" if settings.mode == "prod" else "http://localhost:5173/callback"
+redirect = "https://quiltic.github.io/rpg-hell-frontend/" if settings.mode == "prod" else "http://localhost:5173/"
 
 
 async def init_discord(d: DiscordOAuthClient):
@@ -41,6 +43,7 @@ async def init_discord(d: DiscordOAuthClient):
 
 async def discord_credentials(request: Request):
     auth_token = request.cookies.get("discord_access_token")
+    # print(discord_access_token)
 
     if auth_token is None or await discord.isAuthenticated(auth_token) == False:
         raise Unauthorized
@@ -60,8 +63,8 @@ async def refresh_credentials(request: Request):
 
 
 async def admin(user: Annotated[User, Depends(discord_credentials)]):
-    is_user_admin = get_user(user.id).get(
-        "is_admin")  # this is the actual logic
+    # is_user_admin = get_user(user.id).get(
+    #     "is_admin")  # this is the actual logic
     if (user.id == "173839815400357888") or (user.id == "275002179763306517"):  # etan-josh
         # if (user == "275002179763306517"):  # etan-josh
         return True
@@ -92,15 +95,16 @@ async def logout():
 
 @auth_router.get("/auth/discord/callback")
 async def callback(code: str):
+    expiration_date = datetime.datetime.now(
+        datetime.timezone.utc) + datetime.timedelta(hours=1)
     token, refresh_token = await discord.get_access_token(code)
 
     response = RedirectResponse(url=redirect)
 
     response.set_cookie(key="discord_access_token",
-                        value=token, httponly=True, secure=True)
+                        value=token, httponly=True, secure=True, expires=expiration_date, samesite='None', path="/")
     response.set_cookie(key="discord_refresh_token",
-                        value=refresh_token, httponly=True, secure=True)
-    print(response)
+                        value=refresh_token, httponly=True, secure=True, expires=expiration_date, samesite='None', path="/")
     return response
 
 

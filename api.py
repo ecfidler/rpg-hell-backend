@@ -68,8 +68,10 @@ app = FastAPI(title="RPG Hell API",
               openapi_tags=tags,
               generate_unique_id_function=custom_generate_unique_id)
 
-origins = ["http://localhost:5173", "https://localhost:5173",
+origins = ["http://127.0.0.1", "http://localhost:8000", "http://localhost:5173",
            "http://quiltic.github.io", "https://quiltic.github.io",
+           "https://71.67.242.131", "http://71.67.242.131",
+           "https://portof.yokohama", "http://portof.yokohama"
            ]
 
 app.add_middleware(
