@@ -35,6 +35,14 @@ auth_router = APIRouter(tags=["Users"])
 redirect = "https://quiltic.github.io/rpg-hell-frontend/" if settings.mode == "prod" else "http://localhost:5173/"
 
 
+def expiration():
+    expiration_date = datetime.datetime.now(
+        datetime.timezone.utc) + datetime.timedelta(days=1)
+    refresh_expiration_date = datetime.datetime.now(
+        datetime.timezone.utc) + datetime.timedelta(days=30)
+    return expiration_date, refresh_expiration_date
+
+
 async def init_discord(d: DiscordOAuthClient):
     ssl_context = ssl.create_default_context(cafile=certifi.where())
     conn = aiohttp.TCPConnector(ssl=ssl_context)
@@ -84,18 +92,17 @@ async def login():
 @auth_router.get("/logout")
 async def logout():
     response = RedirectResponse(url=redirect)
-    response.delete_cookie(key="discord_access_token",
-                           httponly=True, secure=True)
-    response.delete_cookie(key="discord_refresh_token",
-                           httponly=True, secure=True)
+    response.set_cookie(key="discord_access_token", max_age=0, expires=0,
+                        httponly=True, secure=True, samesite='None')
+    response.set_cookie(key="discord_refresh_token", max_age=0, expires=0,
+                        httponly=True, secure=True, samesite='None')
 
     return response
 
 
 @auth_router.get("/auth/discord/callback")
 async def callback(code: str):
-    expiration_date = datetime.datetime.now(
-        datetime.timezone.utc) + datetime.timedelta(hours=1)
+    expiration_date, refresh_expiration_date = expiration()
     token, refresh_token = await discord.get_access_token(code)
 
     response = RedirectResponse(url=redirect)
@@ -103,20 +110,22 @@ async def callback(code: str):
     response.set_cookie(key="discord_access_token",
                         value=token, httponly=True, secure=True, expires=expiration_date, samesite='None', path="/")
     response.set_cookie(key="discord_refresh_token",
-                        value=refresh_token, httponly=True, secure=True, expires=expiration_date, samesite='None', path="/")
+                        value=refresh_token, httponly=True, secure=True, expires=refresh_expiration_date, samesite='None', path="/")
     return response
 
 
 @auth_router.get("/refresh")
 async def refresh(refresh_token: str = Depends(refresh_credentials)):
 
+    expiration_date, refresh_expiration_date = expiration()
+
     try:
         new_token, new_refresh_token = await discord.refresh_access_token(refresh_token)
         response = Response(content=True, status_code=status.HTTP_202_ACCEPTED)
         response.set_cookie(key="discord_access_token",
-                            value=new_token, httponly=True, secure=True)
+                            value=new_token, httponly=True, secure=True, expires=expiration_date, samesite='None', path="/")
         response.set_cookie(key="discord_refresh_token",
-                            value=new_refresh_token, httponly=True, secure=True)
+                            value=new_refresh_token, httponly=True, secure=True, expires=refresh_expiration_date, samesite='None', path="/")
     except Unauthorized:
         response = Response(
             content=False, status_code=status.HTTP_401_UNAUTHORIZED)
