@@ -65,8 +65,7 @@ async def refresh_credentials(request: Request):
 async def admin(user: Annotated[User, Depends(discord_credentials)]):
     # is_user_admin = get_user(user.id).get(
     #     "is_admin")  # this is the actual logic
-    if (user.id == "173839815400357888") or (user.id == "275002179763306517"):  # etan-josh
-        # if (user == "275002179763306517"):  # etan-josh
+    if (user.id == "173839815400357888") or (user.id == "275002179763306517"):
         return True
     else:
         raise Unauthorized
@@ -130,37 +129,24 @@ async def refresh(refresh_token: str = Depends(refresh_credentials)):
     # TODO: CHANGE THIS URL TO BE AN ACTUAL URL ON THE SITE
 
 
-# @auth_router.get(
-#     "/authenticated",
-#     dependencies=[Depends(discord.requires_authorization)],
-#     response_model=bool,
-# )
-# async def isAuthenticated(token: str = Depends(discord.get_token)):
-#     try:
-#         auth = await discord.isAuthenticated(token)
-#         return auth
-#     except Unauthorized:
-#         return False
-
 @auth_router.get("/user", dependencies=[Depends(discord_credentials)])
 async def get_discord_user(user: User = Depends(discord_credentials)):
     return user
 
 
+# # Real database version
+# @auth_router.get("/me", dependencies=[Depends(discord_credentials)], response_model=DBUser)
+# async def get_or_create_database_user(user: User = Depends(discord_credentials)):
+#     res = get_create_user(
+#         DBUser(discord_id=user.id, username=user.username, email=user.email))
+#     res["avatar_url"] = user.avatar_url
+#     return res
+
+# temporary discord version
 @auth_router.get("/me", dependencies=[Depends(discord_credentials)], response_model=DBUser)
 async def get_or_create_database_user(user: User = Depends(discord_credentials)):
-    res = get_create_user(
-        DBUser(discord_id=user.id, username=user.username, email=user.email))
-    res["avatar_url"] = user.avatar_url
-    return res
-
-
-# @auth_router.get("/auth/cookie")
-# async def cookie(code: str):
-
-#     response = Response(content="as", status_code=status.HTTP_202_ACCEPTED)
-
-#     response.set_cookie(key="cookie_thing", value=code)
-
-#     print(response)
-#     return response
+    admin: bool = (user.id == "173839815400357888") or (
+        user.id == "275002179763306517")
+    response: DBUser = DBUser(discord_id=user.id, username=user.username,
+                              email=user.email, is_admin=admin, avatar_url=user.avatar_url)
+    return response
