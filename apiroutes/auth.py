@@ -1,6 +1,6 @@
 from os import name
 from typing import Annotated
-from fastapi import APIRouter, Cookie, Depends, Request, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi_discord import DiscordOAuthClient, Unauthorized, User
 
@@ -91,7 +91,7 @@ async def login():
 
 @auth_router.get("/logout")
 async def logout():
-    response = RedirectResponse(url=redirect)
+    response = Response(content="Logged out")
     response.set_cookie(key="discord_access_token", max_age=0, expires=0,
                         httponly=True, secure=True, samesite='None')
     response.set_cookie(key="discord_refresh_token", max_age=0, expires=0,
