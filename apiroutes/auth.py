@@ -52,6 +52,8 @@ async def init_discord(d: DiscordOAuthClient):
 async def discord_credentials(request: Request):
     auth_token = request.cookies.get("discord_access_token")
     # print(discord_access_token)
+    logging.debug(auth_token)
+    logging.debug(settings.secret_password)
 
     if (settings.secret_password == auth_token): # This is for when the db linking is down and should be removed as soon as possible
         return {"id":"275002179763306517"}
@@ -74,8 +76,10 @@ async def admin(user: Annotated[User, Depends(discord_credentials)]):
     # is_user_admin = get_user(user.id).get(
     #     "is_admin")  # this is the actual logic
     if (user.id == "173839815400357888") or (user.id == "275002179763306517"):
+        logging.info("Authenticated")
         return True
     else:
+        logging.info("Unauthorized")
         raise Unauthorized
 
 
