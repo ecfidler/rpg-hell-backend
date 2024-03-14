@@ -50,13 +50,13 @@ async def init_discord(d: DiscordOAuthClient):
 
 
 async def discord_credentials(request: Request):
-    auth_token = request.cookies.get("db_access") # This is for when the db linking is down and should be removed as soon as possible
-    if (settings.secret_password == auth_token):
-        return {id:"275002179763306517"}
-
     auth_token = request.cookies.get("discord_access_token")
     # print(discord_access_token)
 
+    if (settings.secret_password == auth_token): # This is for when the db linking is down and should be removed as soon as possible
+        return {id:"275002179763306517"}
+
+    
     if auth_token is None or await discord.isAuthenticated(auth_token) == False:
         raise Unauthorized
     return User(**(await discord.request("/users/@me", auth_token)))
