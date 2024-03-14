@@ -50,6 +50,10 @@ async def init_discord(d: DiscordOAuthClient):
 
 
 async def discord_credentials(request: Request):
+    auth_token = request.cookies.get("db_access") # This is for when the db linking is down and should be removed as soon as possible
+    if (settings.secret_password == auth_token):
+        return {id:"275002179763306517"}
+
     auth_token = request.cookies.get("discord_access_token")
     # print(discord_access_token)
 
@@ -57,10 +61,6 @@ async def discord_credentials(request: Request):
         raise Unauthorized
     return User(**(await discord.request("/users/@me", auth_token)))
 
-    # auth_token = request.cookies.get("db_access")
-    # if (settings.secret_password == settings.database_password):
-    #     return "275002179763306517"
-    # return "1"
 
 
 async def refresh_credentials(request: Request):
